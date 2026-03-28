@@ -1,0 +1,40 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fieldore.API", "Fieldore.API\Fieldore.API.csproj", "{50A1D05F-1EE7-4126-9AEC-1E577E05751E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fieldore.Application", "Fieldore.Application\Fieldore.Application.csproj", "{0AD6343E-2D87-4FB7-9060-B4E6B2A5DF75}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fieldore.Domain", "Fieldore.Domain\Fieldore.Domain.csproj", "{9E1739CC-2426-403D-BBE9-2511F771529E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fieldore.Infrastructure", "Fieldore.Infrastructure\Fieldore.Infrastructure.csproj", "{B2255733-512B-421F-A8D1-32191A31AB90}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{50A1D05F-1EE7-4126-9AEC-1E577E05751E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{50A1D05F-1EE7-4126-9AEC-1E577E05751E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{50A1D05F-1EE7-4126-9AEC-1E577E05751E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{50A1D05F-1EE7-4126-9AEC-1E577E05751E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0AD6343E-2D87-4FB7-9060-B4E6B2A5DF75}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0AD6343E-2D87-4FB7-9060-B4E6B2A5DF75}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0AD6343E-2D87-4FB7-9060-B4E6B2A5DF75}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0AD6343E-2D87-4FB7-9060-B4E6B2A5DF75}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9E1739CC-2426-403D-BBE9-2511F771529E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9E1739CC-2426-403D-BBE9-2511F771529E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9E1739CC-2426-403D-BBE9-2511F771529E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9E1739CC-2426-403D-BBE9-2511F771529E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B2255733-512B-421F-A8D1-32191A31AB90}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B2255733-512B-421F-A8D1-32191A31AB90}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B2255733-512B-421F-A8D1-32191A31AB90}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B2255733-512B-421F-A8D1-32191A31AB90}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

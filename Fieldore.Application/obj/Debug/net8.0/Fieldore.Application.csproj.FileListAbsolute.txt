@@ -1,0 +1,16 @@
+/Users/sandy/Developer/react-native/Fieldore/FieldoreBackend/Fieldore.Application/bin/Debug/net8.0/Fieldore.Application.deps.json
+/Users/sandy/Developer/react-native/Fieldore/FieldoreBackend/Fieldore.Application/bin/Debug/net8.0/Fieldore.Application.dll
+/Users/sandy/Developer/react-native/Fieldore/FieldoreBackend/Fieldore.Application/bin/Debug/net8.0/Fieldore.Application.pdb
+/Users/sandy/Developer/react-native/Fieldore/FieldoreBackend/Fieldore.Application/bin/Debug/net8.0/Fieldore.Domain.dll
+/Users/sandy/Developer/react-native/Fieldore/FieldoreBackend/Fieldore.Application/bin/Debug/net8.0/Fieldore.Domain.pdb
+/Users/sandy/Developer/react-native/Fieldore/FieldoreBackend/Fieldore.Application/obj/Debug/net8.0/Fieldore.Application.csproj.AssemblyReference.cache
+/Users/sandy/Developer/react-native/Fieldore/FieldoreBackend/Fieldore.Application/obj/Debug/net8.0/Fieldore.Application.GeneratedMSBuildEditorConfig.editorconfig
+/Users/sandy/Developer/react-native/Fieldore/FieldoreBackend/Fieldore.Application/obj/Debug/net8.0/Fieldore.Application.AssemblyInfoInputs.cache
+/Users/sandy/Developer/react-native/Fieldore/FieldoreBackend/Fieldore.Application/obj/Debug/net8.0/Fieldore.Application.AssemblyInfo.cs
+/Users/sandy/Developer/react-native/Fieldore/FieldoreBackend/Fieldore.Application/obj/Debug/net8.0/Fieldore.Application.csproj.CoreCompileInputs.cache
+/Users/sandy/Developer/react-native/Fieldore/FieldoreBackend/Fieldore.Application/obj/Debug/net8.0/Fieldore.Application.sourcelink.json
+/Users/sandy/Developer/react-native/Fieldore/FieldoreBackend/Fieldore.Application/obj/Debug/net8.0/Fieldore.270DF2EE.Up2Date
+/Users/sandy/Developer/react-native/Fieldore/FieldoreBackend/Fieldore.Application/obj/Debug/net8.0/Fieldore.Application.dll
+/Users/sandy/Developer/react-native/Fieldore/FieldoreBackend/Fieldore.Application/obj/Debug/net8.0/refint/Fieldore.Application.dll
+/Users/sandy/Developer/react-native/Fieldore/FieldoreBackend/Fieldore.Application/obj/Debug/net8.0/Fieldore.Application.pdb
+/Users/sandy/Developer/react-native/Fieldore/FieldoreBackend/Fieldore.Application/obj/Debug/net8.0/ref/Fieldore.Application.dll

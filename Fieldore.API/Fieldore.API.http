@@ -1,0 +1,6 @@
+@Fieldore.API_HostAddress = http://localhost:5166
+
+GET {{Fieldore.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
