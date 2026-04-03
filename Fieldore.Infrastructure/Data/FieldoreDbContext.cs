@@ -22,6 +22,8 @@ public sealed class FieldoreDbContext : DbContext
     public DbSet<Customer> Customers => Set<Customer>();
     public DbSet<CustomerAddress> CustomerAddresses => Set<CustomerAddress>();
     public DbSet<CustomerNote> CustomerNotes => Set<CustomerNote>();
+    public DbSet<Country> Countries => Set<Country>();
+    public DbSet<StateProvince> StateProvinces => Set<StateProvince>();
     public DbSet<Lead> Leads => Set<Lead>();
     public DbSet<Job> Jobs => Set<Job>();
     public DbSet<JobAssignment> JobAssignments => Set<JobAssignment>();
@@ -51,6 +53,7 @@ public sealed class FieldoreDbContext : DbContext
         ConfigureUserProfiles(modelBuilder);
         ConfigureBusinesses(modelBuilder);
         ConfigureCustomers(modelBuilder);
+        ConfigureLocations(modelBuilder);
         ConfigureLeads(modelBuilder);
         ConfigureJobs(modelBuilder);
         ConfigureEstimates(modelBuilder);
@@ -207,6 +210,23 @@ public sealed class FieldoreDbContext : DbContext
         customers.Property(x => x.InternalNotes).HasColumnName("internal_notes");
         customers.Property(x => x.BillingSameAsService).HasColumnName("billing_same_as_service");
         customers.Property(x => x.IsActive).HasColumnName("is_active");
+        customers.HasIndex(x => new { x.BusinessId, x.MobilePhone })
+            .IsUnique()
+            .HasDatabaseName("ux_customers_business_mobile");
+        customers.HasIndex(x => new { x.BusinessId, x.Email })
+            .HasDatabaseName("ix_customers_business_email");
+        customers.HasIndex(x => new { x.BusinessId, x.IsActive })
+            .HasDatabaseName("ix_customers_business_active");
+
+        customers.HasIndex(x => x.FirstName)
+            .HasDatabaseName("ix_customers_first_name");
+
+        customers.HasIndex(x => x.LastName)
+            .HasDatabaseName("ix_customers_last_name");
+
+        customers.HasIndex(x => x.CreatedAt)
+            .HasDatabaseName("ix_customers_created_at");
+        
         ConfigureAuditColumns(customers);
 
         var addresses = modelBuilder.Entity<CustomerAddress>();
@@ -247,6 +267,35 @@ public sealed class FieldoreDbContext : DbContext
         entity.Property(x => x.ContactedAt).HasColumnName("contacted_at");
         entity.Property(x => x.ConvertedAt).HasColumnName("converted_at");
         ConfigureAuditColumns(entity);
+    }
+
+    private static void ConfigureLocations(ModelBuilder modelBuilder)
+    {
+        var countries = modelBuilder.Entity<Country>();
+        countries.ToTable("countries");
+        countries.HasKey(x => x.Id);
+        countries.Property(x => x.Name).HasColumnName("name");
+        countries.Property(x => x.Code).HasColumnName("code");
+        countries.HasIndex(x => x.Code).IsUnique();
+        countries.HasIndex(x => x.Name).IsUnique();
+        countries.HasData(LocationSeedData.Countries);
+        ConfigureAuditColumns(countries);
+
+        var states = modelBuilder.Entity<StateProvince>();
+        states.ToTable("state_provinces");
+        states.HasKey(x => x.Id);
+        states.Property(x => x.CountryId).HasColumnName("country_id");
+        states.Property(x => x.Name).HasColumnName("name");
+        states.Property(x => x.Code).HasColumnName("code");
+        states.HasIndex(x => new { x.CountryId, x.Code }).IsUnique();
+        states.HasIndex(x => new { x.CountryId, x.Name }).IsUnique();
+        states
+            .HasOne(x => x.Country)
+            .WithMany(x => x.States)
+            .HasForeignKey(x => x.CountryId)
+            .OnDelete(DeleteBehavior.Restrict);
+        states.HasData(LocationSeedData.States);
+        ConfigureAuditColumns(states);
     }
 
     private static void ConfigureJobs(ModelBuilder modelBuilder)

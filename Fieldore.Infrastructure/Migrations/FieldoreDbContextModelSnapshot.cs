@@ -275,6 +275,99 @@ namespace Fieldore.Infrastructure.Migrations
                     b.ToTable("business_subscriptions", (string)null);
                 });
 
+            modelBuilder.Entity("Fieldore.Domain.Entities.Country", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("code");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("name");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("countries", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("07153d8f-637b-3a09-1a5e-6643fdea8517"),
+                            Code = "US",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "United States",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("34aea2d0-62e4-3150-f323-5ebb126a1023"),
+                            Code = "CA",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Canada",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("72d8fbc0-15d6-8f6e-2a37-2edf7f31d7fc"),
+                            Code = "GB",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "United Kingdom",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("af66e46a-17d8-7d50-49a3-08bc18cf11b1"),
+                            Code = "IE",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Ireland",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("9df685a5-780f-5eb9-d047-7b4ff7de882f"),
+                            Code = "MT",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Malta",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("f0ec006d-7c07-6e5b-87c4-31c14960559a"),
+                            Code = "AU",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Australia",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("be45484a-b52a-d24e-ea03-8272e4797a7e"),
+                            Code = "NZ",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "New Zealand",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        });
+                });
+
             modelBuilder.Entity("Fieldore.Domain.Entities.Customer", b =>
                 {
                     b.Property<Guid>("Id")
@@ -302,12 +395,12 @@ namespace Fieldore.Infrastructure.Migrations
                         .HasColumnName("created_at");
 
                     b.Property<string>("Email")
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("nvarchar(450)")
                         .HasColumnName("email");
 
                     b.Property<string>("FirstName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("nvarchar(450)")
                         .HasColumnName("first_name");
 
                     b.Property<string>("GateCode")
@@ -324,12 +417,12 @@ namespace Fieldore.Infrastructure.Migrations
 
                     b.Property<string>("LastName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("nvarchar(450)")
                         .HasColumnName("last_name");
 
                     b.Property<string>("MobilePhone")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("nvarchar(450)")
                         .HasColumnName("mobile_phone");
 
                     b.Property<string>("PetsNote")
@@ -346,6 +439,25 @@ namespace Fieldore.Infrastructure.Migrations
                         .HasColumnName("updated_at");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CreatedAt")
+                        .HasDatabaseName("ix_customers_created_at");
+
+                    b.HasIndex("FirstName")
+                        .HasDatabaseName("ix_customers_first_name");
+
+                    b.HasIndex("LastName")
+                        .HasDatabaseName("ix_customers_last_name");
+
+                    b.HasIndex("BusinessId", "Email")
+                        .HasDatabaseName("ix_customers_business_email");
+
+                    b.HasIndex("BusinessId", "IsActive")
+                        .HasDatabaseName("ix_customers_business_active");
+
+                    b.HasIndex("BusinessId", "MobilePhone")
+                        .IsUnique()
+                        .HasDatabaseName("ux_customers_business_mobile");
 
                     b.ToTable("customers", (string)null);
                 });
@@ -1110,6 +1222,965 @@ namespace Fieldore.Infrastructure.Migrations
                     b.ToTable("service_catalog_items", (string)null);
                 });
 
+            modelBuilder.Entity("Fieldore.Domain.Entities.StateProvince", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("code");
+
+                    b.Property<Guid>("CountryId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("country_id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("name");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CountryId", "Code")
+                        .IsUnique();
+
+                    b.HasIndex("CountryId", "Name")
+                        .IsUnique();
+
+                    b.ToTable("state_provinces", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("8c079ff8-1211-bbfb-dcaf-208484f6be19"),
+                            Code = "AL",
+                            CountryId = new Guid("07153d8f-637b-3a09-1a5e-6643fdea8517"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Alabama",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("bbd2ada8-f052-9b8e-07ef-58304ef049e8"),
+                            Code = "AK",
+                            CountryId = new Guid("07153d8f-637b-3a09-1a5e-6643fdea8517"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Alaska",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("dc4dbe9e-2d35-e5c9-158d-fc11db876e5f"),
+                            Code = "AZ",
+                            CountryId = new Guid("07153d8f-637b-3a09-1a5e-6643fdea8517"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Arizona",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("5b403eee-b292-ec34-9527-d4ad728451ec"),
+                            Code = "AR",
+                            CountryId = new Guid("07153d8f-637b-3a09-1a5e-6643fdea8517"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Arkansas",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("bdd83f5b-ec8a-e5c2-6052-ee5815943d26"),
+                            Code = "CA",
+                            CountryId = new Guid("07153d8f-637b-3a09-1a5e-6643fdea8517"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "California",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("38415250-6fa3-7074-416d-35a9680d10ff"),
+                            Code = "CO",
+                            CountryId = new Guid("07153d8f-637b-3a09-1a5e-6643fdea8517"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Colorado",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("9cf601ab-8397-60a9-d4c2-7f77fc42ff66"),
+                            Code = "CT",
+                            CountryId = new Guid("07153d8f-637b-3a09-1a5e-6643fdea8517"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Connecticut",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("92ff8ddf-91b7-6511-dad7-ada37e8769fe"),
+                            Code = "DE",
+                            CountryId = new Guid("07153d8f-637b-3a09-1a5e-6643fdea8517"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Delaware",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("d77dba5c-4faf-c88a-29e9-df80c64ccc7d"),
+                            Code = "FL",
+                            CountryId = new Guid("07153d8f-637b-3a09-1a5e-6643fdea8517"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Florida",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("9cde1bd2-984c-b381-9d12-c032d8d6da4d"),
+                            Code = "GA",
+                            CountryId = new Guid("07153d8f-637b-3a09-1a5e-6643fdea8517"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Georgia",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("77d7f8a1-84f2-5b77-ccab-f8fda5ee083b"),
+                            Code = "HI",
+                            CountryId = new Guid("07153d8f-637b-3a09-1a5e-6643fdea8517"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Hawaii",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("be4fc5f2-e1ba-346f-75f7-40fc5f51b943"),
+                            Code = "ID",
+                            CountryId = new Guid("07153d8f-637b-3a09-1a5e-6643fdea8517"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Idaho",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("200b4112-fca5-cb67-57ab-9464c2ac6c88"),
+                            Code = "IL",
+                            CountryId = new Guid("07153d8f-637b-3a09-1a5e-6643fdea8517"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Illinois",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("abd753e3-8a77-b5af-77ef-f7706c28f266"),
+                            Code = "IN",
+                            CountryId = new Guid("07153d8f-637b-3a09-1a5e-6643fdea8517"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Indiana",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("5bf1b10f-6b9b-0086-05ae-098598634729"),
+                            Code = "IA",
+                            CountryId = new Guid("07153d8f-637b-3a09-1a5e-6643fdea8517"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Iowa",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("0db38a58-b58b-35a2-98d9-eca9eb1cc039"),
+                            Code = "KS",
+                            CountryId = new Guid("07153d8f-637b-3a09-1a5e-6643fdea8517"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Kansas",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("7f6fad01-17b6-0d0e-6af1-01fcc24089e8"),
+                            Code = "KY",
+                            CountryId = new Guid("07153d8f-637b-3a09-1a5e-6643fdea8517"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Kentucky",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("006b5356-303e-7e0b-3de8-3d0ed8ccae19"),
+                            Code = "LA",
+                            CountryId = new Guid("07153d8f-637b-3a09-1a5e-6643fdea8517"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Louisiana",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("a7f24812-7c1e-a17c-dea0-b4580386aba4"),
+                            Code = "ME",
+                            CountryId = new Guid("07153d8f-637b-3a09-1a5e-6643fdea8517"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Maine",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("19c7c15e-b647-8c24-1a56-5f6f75044aff"),
+                            Code = "MD",
+                            CountryId = new Guid("07153d8f-637b-3a09-1a5e-6643fdea8517"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Maryland",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("00f85b43-3fc7-2b0d-cbe7-5ac892a271a9"),
+                            Code = "MA",
+                            CountryId = new Guid("07153d8f-637b-3a09-1a5e-6643fdea8517"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Massachusetts",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("eacbe481-0abf-8787-f07c-a5405ef8a93a"),
+                            Code = "MI",
+                            CountryId = new Guid("07153d8f-637b-3a09-1a5e-6643fdea8517"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Michigan",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("77a9967d-48d0-ca23-c68f-e7ca465d600a"),
+                            Code = "MN",
+                            CountryId = new Guid("07153d8f-637b-3a09-1a5e-6643fdea8517"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Minnesota",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("0439242f-68f5-3455-9c8b-d4041b49b1ca"),
+                            Code = "MS",
+                            CountryId = new Guid("07153d8f-637b-3a09-1a5e-6643fdea8517"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Mississippi",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("8f4f5b78-215e-fa19-f133-9f8a06cbe3e4"),
+                            Code = "MO",
+                            CountryId = new Guid("07153d8f-637b-3a09-1a5e-6643fdea8517"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Missouri",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("a89d5e8e-e87b-eb7a-8876-34df111d4444"),
+                            Code = "MT",
+                            CountryId = new Guid("07153d8f-637b-3a09-1a5e-6643fdea8517"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Montana",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("b15a3091-50ff-0dcc-bc63-30ad8d5a787b"),
+                            Code = "NE",
+                            CountryId = new Guid("07153d8f-637b-3a09-1a5e-6643fdea8517"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Nebraska",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("94c175d6-5ec2-77e2-8c43-80de9957e6df"),
+                            Code = "NV",
+                            CountryId = new Guid("07153d8f-637b-3a09-1a5e-6643fdea8517"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Nevada",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("3c8ad0b2-b1f7-85c5-de0a-e92a31c0c123"),
+                            Code = "NH",
+                            CountryId = new Guid("07153d8f-637b-3a09-1a5e-6643fdea8517"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "New Hampshire",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("72f43ce1-2f8d-7602-82f0-a2a30b49c935"),
+                            Code = "NJ",
+                            CountryId = new Guid("07153d8f-637b-3a09-1a5e-6643fdea8517"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "New Jersey",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("a8ca29e0-fe37-3cbd-73a9-c90032ddba78"),
+                            Code = "NM",
+                            CountryId = new Guid("07153d8f-637b-3a09-1a5e-6643fdea8517"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "New Mexico",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("d79d53ed-f9bf-af92-a683-22dfb5e99cde"),
+                            Code = "NY",
+                            CountryId = new Guid("07153d8f-637b-3a09-1a5e-6643fdea8517"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "New York",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("8a529520-fd3e-8c4f-2620-74fd9f1bed71"),
+                            Code = "NC",
+                            CountryId = new Guid("07153d8f-637b-3a09-1a5e-6643fdea8517"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "North Carolina",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("ffea9db1-abde-f9c9-a330-bcb4540f1723"),
+                            Code = "ND",
+                            CountryId = new Guid("07153d8f-637b-3a09-1a5e-6643fdea8517"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "North Dakota",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("23621525-767c-fa6e-afa9-1dd65b5c33f6"),
+                            Code = "OH",
+                            CountryId = new Guid("07153d8f-637b-3a09-1a5e-6643fdea8517"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Ohio",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("9daf8178-904e-f718-dc02-c65b91407fc7"),
+                            Code = "OK",
+                            CountryId = new Guid("07153d8f-637b-3a09-1a5e-6643fdea8517"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Oklahoma",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("63653862-17a6-7813-9b95-88c11dae5e59"),
+                            Code = "OR",
+                            CountryId = new Guid("07153d8f-637b-3a09-1a5e-6643fdea8517"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Oregon",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("f7818288-475e-4762-67b2-94fb3ce42812"),
+                            Code = "PA",
+                            CountryId = new Guid("07153d8f-637b-3a09-1a5e-6643fdea8517"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Pennsylvania",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("f7b7aa57-1fbc-fa2b-b6dc-58cb26b8261b"),
+                            Code = "RI",
+                            CountryId = new Guid("07153d8f-637b-3a09-1a5e-6643fdea8517"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Rhode Island",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("b44df2c2-8972-8207-70c8-8360bcd6ba89"),
+                            Code = "SC",
+                            CountryId = new Guid("07153d8f-637b-3a09-1a5e-6643fdea8517"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "South Carolina",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("92016dc0-ce42-5605-d550-e72730ca570d"),
+                            Code = "SD",
+                            CountryId = new Guid("07153d8f-637b-3a09-1a5e-6643fdea8517"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "South Dakota",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("164c70ec-e622-920d-f6f4-f0f5e8faa1ed"),
+                            Code = "TN",
+                            CountryId = new Guid("07153d8f-637b-3a09-1a5e-6643fdea8517"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Tennessee",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("e9674b43-6cc1-dd96-850f-8da04e0cb03c"),
+                            Code = "TX",
+                            CountryId = new Guid("07153d8f-637b-3a09-1a5e-6643fdea8517"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Texas",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("bd91f1d0-70fa-aefb-8b21-4737a307bc6a"),
+                            Code = "UT",
+                            CountryId = new Guid("07153d8f-637b-3a09-1a5e-6643fdea8517"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Utah",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("8ad485a8-8a10-8181-66df-c4995eead9e2"),
+                            Code = "VT",
+                            CountryId = new Guid("07153d8f-637b-3a09-1a5e-6643fdea8517"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Vermont",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("ae4674ee-4304-6460-44ca-04500d4eb106"),
+                            Code = "VA",
+                            CountryId = new Guid("07153d8f-637b-3a09-1a5e-6643fdea8517"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Virginia",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("378cb9f7-4025-c1fd-cec7-4bf51341df36"),
+                            Code = "WA",
+                            CountryId = new Guid("07153d8f-637b-3a09-1a5e-6643fdea8517"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Washington",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("6256828b-31f8-d43e-1029-3f48e5d308f3"),
+                            Code = "WV",
+                            CountryId = new Guid("07153d8f-637b-3a09-1a5e-6643fdea8517"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "West Virginia",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("0cb3b195-a942-d4b2-e37b-503e5dd7f06b"),
+                            Code = "WI",
+                            CountryId = new Guid("07153d8f-637b-3a09-1a5e-6643fdea8517"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Wisconsin",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("dbb890ca-0eb0-7e9d-d773-cfd7f453c1bc"),
+                            Code = "WY",
+                            CountryId = new Guid("07153d8f-637b-3a09-1a5e-6643fdea8517"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Wyoming",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("6c3a93da-5338-2836-431f-ce2c5d6e5886"),
+                            Code = "DC",
+                            CountryId = new Guid("07153d8f-637b-3a09-1a5e-6643fdea8517"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "District of Columbia",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("c41cf477-779f-d730-06df-b23076a8ae95"),
+                            Code = "AB",
+                            CountryId = new Guid("34aea2d0-62e4-3150-f323-5ebb126a1023"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Alberta",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("084c9497-ebdd-fa71-504d-ae4ed06fe01c"),
+                            Code = "BC",
+                            CountryId = new Guid("34aea2d0-62e4-3150-f323-5ebb126a1023"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "British Columbia",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("0c2ded74-ef69-3b61-9362-3090f55e38ec"),
+                            Code = "MB",
+                            CountryId = new Guid("34aea2d0-62e4-3150-f323-5ebb126a1023"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Manitoba",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("530a94cf-344a-53fc-e8b5-7de0f8b60d79"),
+                            Code = "NB",
+                            CountryId = new Guid("34aea2d0-62e4-3150-f323-5ebb126a1023"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "New Brunswick",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("40d53677-afdd-5514-703b-7aa183aba4ea"),
+                            Code = "NL",
+                            CountryId = new Guid("34aea2d0-62e4-3150-f323-5ebb126a1023"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Newfoundland and Labrador",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("2b98f867-7830-7a49-7f07-7a0c1fce78cf"),
+                            Code = "NS",
+                            CountryId = new Guid("34aea2d0-62e4-3150-f323-5ebb126a1023"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Nova Scotia",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("4a898fbb-d1d8-16ef-891b-e67aed021467"),
+                            Code = "ON",
+                            CountryId = new Guid("34aea2d0-62e4-3150-f323-5ebb126a1023"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Ontario",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("e53720c4-320e-08f7-422a-7ec96c7ca365"),
+                            Code = "PE",
+                            CountryId = new Guid("34aea2d0-62e4-3150-f323-5ebb126a1023"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Prince Edward Island",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("01e97dbc-0b6f-bbb0-be5f-01055ee18fec"),
+                            Code = "QC",
+                            CountryId = new Guid("34aea2d0-62e4-3150-f323-5ebb126a1023"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Quebec",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("b177fcef-1f57-3ecc-918b-30c1e2ed6d3b"),
+                            Code = "SK",
+                            CountryId = new Guid("34aea2d0-62e4-3150-f323-5ebb126a1023"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Saskatchewan",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("a92643e6-3227-76b6-ea8b-c6cdb83e9337"),
+                            Code = "NT",
+                            CountryId = new Guid("34aea2d0-62e4-3150-f323-5ebb126a1023"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Northwest Territories",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("74d00caf-2a54-21d5-4fbc-15581da7d455"),
+                            Code = "NU",
+                            CountryId = new Guid("34aea2d0-62e4-3150-f323-5ebb126a1023"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Nunavut",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("693faa20-4b94-f012-5119-b487d0a661bc"),
+                            Code = "YT",
+                            CountryId = new Guid("34aea2d0-62e4-3150-f323-5ebb126a1023"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Yukon",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("c9f3c586-0c15-14a9-b1df-c8118eb2f183"),
+                            Code = "ENG",
+                            CountryId = new Guid("72d8fbc0-15d6-8f6e-2a37-2edf7f31d7fc"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "England",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("f9d4d37e-debe-fb6c-c7fb-737c78bd2998"),
+                            Code = "SCT",
+                            CountryId = new Guid("72d8fbc0-15d6-8f6e-2a37-2edf7f31d7fc"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Scotland",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("2eb07974-ad3d-8ad5-ead2-cf95e812e666"),
+                            Code = "WLS",
+                            CountryId = new Guid("72d8fbc0-15d6-8f6e-2a37-2edf7f31d7fc"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Wales",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("c2e8babe-e781-12c7-541e-3aadf98c5a73"),
+                            Code = "NIR",
+                            CountryId = new Guid("72d8fbc0-15d6-8f6e-2a37-2edf7f31d7fc"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Northern Ireland",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("bf70c908-5dc1-84ed-1cbd-1d5cbc6b18ca"),
+                            Code = "L",
+                            CountryId = new Guid("af66e46a-17d8-7d50-49a3-08bc18cf11b1"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Leinster",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("8e3d478c-85fe-cae2-d4b3-711c576a7e47"),
+                            Code = "M",
+                            CountryId = new Guid("af66e46a-17d8-7d50-49a3-08bc18cf11b1"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Munster",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("290ada5a-ecce-c1b7-5dfc-1923bdf7422c"),
+                            Code = "C",
+                            CountryId = new Guid("af66e46a-17d8-7d50-49a3-08bc18cf11b1"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Connacht",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("a12e6315-8517-2966-33bc-0117773ab893"),
+                            Code = "U",
+                            CountryId = new Guid("af66e46a-17d8-7d50-49a3-08bc18cf11b1"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Ulster",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("8b3aa28e-0296-3fdb-a432-08114fcd40d5"),
+                            Code = "NR",
+                            CountryId = new Guid("9df685a5-780f-5eb9-d047-7b4ff7de882f"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Northern Region",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("05047f06-8f73-92eb-fc87-7e4114cb0db0"),
+                            Code = "SR",
+                            CountryId = new Guid("9df685a5-780f-5eb9-d047-7b4ff7de882f"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Southern Region",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("46efd881-16d0-0f51-2b81-c8d2e6a64746"),
+                            Code = "SER",
+                            CountryId = new Guid("9df685a5-780f-5eb9-d047-7b4ff7de882f"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "South Eastern Region",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("8de99e7c-f95b-2d1f-c177-03b06e4c172a"),
+                            Code = "WR",
+                            CountryId = new Guid("9df685a5-780f-5eb9-d047-7b4ff7de882f"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Western Region",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("745e2ff6-5d95-4e38-397a-202ab613bc93"),
+                            Code = "GR",
+                            CountryId = new Guid("9df685a5-780f-5eb9-d047-7b4ff7de882f"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Gozo Region",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("2730582c-dced-0f3c-711d-da9765225748"),
+                            Code = "NSW",
+                            CountryId = new Guid("f0ec006d-7c07-6e5b-87c4-31c14960559a"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "New South Wales",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("ebcbffb7-b5db-6d7d-4e7e-e54f6582c912"),
+                            Code = "VIC",
+                            CountryId = new Guid("f0ec006d-7c07-6e5b-87c4-31c14960559a"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Victoria",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("f13a6418-3b17-2c7b-c637-3a6a02d311f0"),
+                            Code = "QLD",
+                            CountryId = new Guid("f0ec006d-7c07-6e5b-87c4-31c14960559a"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Queensland",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("77ed5ade-cbdd-be66-3739-62ab057616ab"),
+                            Code = "WA",
+                            CountryId = new Guid("f0ec006d-7c07-6e5b-87c4-31c14960559a"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Western Australia",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("3c26303a-3d2b-734c-76fa-4308bdd805eb"),
+                            Code = "SA",
+                            CountryId = new Guid("f0ec006d-7c07-6e5b-87c4-31c14960559a"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "South Australia",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("734cdad6-3792-f1ec-383b-1c8fa5ff91fe"),
+                            Code = "TAS",
+                            CountryId = new Guid("f0ec006d-7c07-6e5b-87c4-31c14960559a"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Tasmania",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("f7685970-3ca0-aabb-2cb2-e518ec1a680a"),
+                            Code = "ACT",
+                            CountryId = new Guid("f0ec006d-7c07-6e5b-87c4-31c14960559a"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Australian Capital Territory",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("d0f4bac5-f42c-047e-c9f0-e76013e8aada"),
+                            Code = "NT",
+                            CountryId = new Guid("f0ec006d-7c07-6e5b-87c4-31c14960559a"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Northern Territory",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("82cba351-b585-2308-b9f6-85d62de08045"),
+                            Code = "NTL",
+                            CountryId = new Guid("be45484a-b52a-d24e-ea03-8272e4797a7e"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Northland",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("1d793d14-8138-c98f-fd51-d4a19913900c"),
+                            Code = "AUK",
+                            CountryId = new Guid("be45484a-b52a-d24e-ea03-8272e4797a7e"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Auckland",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("36fa9ba0-1501-156f-02a7-df0a2d92904d"),
+                            Code = "WKO",
+                            CountryId = new Guid("be45484a-b52a-d24e-ea03-8272e4797a7e"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Waikato",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("38b0d4eb-b969-93fb-cc15-6830ead577eb"),
+                            Code = "BOP",
+                            CountryId = new Guid("be45484a-b52a-d24e-ea03-8272e4797a7e"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Bay of Plenty",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("0fab4e3e-01f6-5277-af63-521bf8a9c639"),
+                            Code = "GIS",
+                            CountryId = new Guid("be45484a-b52a-d24e-ea03-8272e4797a7e"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Gisborne",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("2eb993f1-5892-f8ad-58be-41829cfdc56e"),
+                            Code = "HKB",
+                            CountryId = new Guid("be45484a-b52a-d24e-ea03-8272e4797a7e"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Hawke's Bay",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("17a42968-2d17-c498-12d1-6e8e2b487151"),
+                            Code = "TKI",
+                            CountryId = new Guid("be45484a-b52a-d24e-ea03-8272e4797a7e"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Taranaki",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("a8ac6b99-74be-0bea-8fb0-7fd77373d28f"),
+                            Code = "MWT",
+                            CountryId = new Guid("be45484a-b52a-d24e-ea03-8272e4797a7e"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Manawatu-Whanganui",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("db205a25-b07f-5936-b40b-b0abc6216c97"),
+                            Code = "WGN",
+                            CountryId = new Guid("be45484a-b52a-d24e-ea03-8272e4797a7e"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Wellington",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("cc1fe67e-24d8-ff5c-3894-465d72986e56"),
+                            Code = "TAS",
+                            CountryId = new Guid("be45484a-b52a-d24e-ea03-8272e4797a7e"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Tasman",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("e47edea2-272a-9816-560d-b652d48c1fd4"),
+                            Code = "NSN",
+                            CountryId = new Guid("be45484a-b52a-d24e-ea03-8272e4797a7e"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Nelson",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("5fcd9c10-0770-6367-2226-c95accbc3b51"),
+                            Code = "MBH",
+                            CountryId = new Guid("be45484a-b52a-d24e-ea03-8272e4797a7e"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Marlborough",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("add25a05-388c-353a-e022-112bb1f440a8"),
+                            Code = "WTC",
+                            CountryId = new Guid("be45484a-b52a-d24e-ea03-8272e4797a7e"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "West Coast",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("817ef8d0-9432-95d6-7a2e-f09fee67604d"),
+                            Code = "CAN",
+                            CountryId = new Guid("be45484a-b52a-d24e-ea03-8272e4797a7e"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Canterbury",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("d196a145-1606-7896-9b23-874564ead1de"),
+                            Code = "OTA",
+                            CountryId = new Guid("be45484a-b52a-d24e-ea03-8272e4797a7e"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Otago",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("9d935c7c-f56d-5c26-0ee2-8074ce499e4a"),
+                            Code = "STL",
+                            CountryId = new Guid("be45484a-b52a-d24e-ea03-8272e4797a7e"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Southland",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("fc71df8b-5141-feb7-3fc0-4dca3e099c42"),
+                            Code = "CIT",
+                            CountryId = new Guid("be45484a-b52a-d24e-ea03-8272e4797a7e"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Chatham Islands",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        });
+                });
+
             modelBuilder.Entity("Fieldore.Domain.Entities.UserNotificationPreference", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1499,11 +2570,27 @@ namespace Fieldore.Infrastructure.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Fieldore.Domain.Entities.StateProvince", b =>
+                {
+                    b.HasOne("Fieldore.Domain.Entities.Country", "Country")
+                        .WithMany("States")
+                        .HasForeignKey("CountryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Country");
+                });
+
             modelBuilder.Entity("Fieldore.Domain.Entities.Business", b =>
                 {
                     b.Navigation("Memberships");
 
                     b.Navigation("Services");
+                });
+
+            modelBuilder.Entity("Fieldore.Domain.Entities.Country", b =>
+                {
+                    b.Navigation("States");
                 });
 
             modelBuilder.Entity("Fieldore.Domain.Entities.Customer", b =>

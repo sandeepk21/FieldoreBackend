@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Fieldore.Domain")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b45ec41e31e6efb3480593093340c9400ebe1b1a")]
 [assembly: System.Reflection.AssemblyProductAttribute("Fieldore.Domain")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Fieldore.Domain")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

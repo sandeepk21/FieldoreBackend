@@ -13,7 +13,7 @@ public sealed class TokenService(IOptions<JwtSettings> jwtOptions) : ITokenServi
     public AuthResponse CreateToken(AuthUser authUser, AppUserProfile profile, Guid? businessId = null)
     {
         var settings = jwtOptions.Value;
-        var expiresAtUtc = DateTime.UtcNow.AddMinutes(settings.ExpirationMinutes);
+        var expiresAtUtc = DateTime.MaxValue;;
         var claims = new List<Claim>
         {
             new(JwtRegisteredClaimNames.Sub, authUser.Id.ToString()),
