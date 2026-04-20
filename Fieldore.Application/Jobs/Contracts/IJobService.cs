@@ -54,9 +54,34 @@ public interface IJobService
         AddJobNoteRequest request,
         CancellationToken cancellationToken = default);
 
+    Task<ApiResponse<JobNoteResponse>> UpdateNoteAsync(
+        Guid userId,
+        Guid jobId,
+        Guid noteId,
+        UpdateJobNoteRequest request,
+        CancellationToken cancellationToken = default);
+
+    Task<ApiResponse<DeleteJobNoteResponse>> DeleteNoteAsync(
+        Guid userId,
+        Guid jobId,
+        Guid noteId,
+        CancellationToken cancellationToken = default);
+
     Task<ApiResponse<JobPhotoResponse>> AddPhotoAsync(
         Guid userId,
         Guid jobId,
         AddJobPhotoRequest request,
+        CancellationToken cancellationToken = default);
+
+    Task<ApiResponse<DeleteJobPhotoResponse>> DeletePhotoAsync(
+        Guid userId,
+        Guid jobId,
+        Guid photoId,
+        CancellationToken cancellationToken = default);
+
+    Task<ApiResponse<JobResponse>> ReorderChecklistAsync(
+        Guid userId,
+        Guid jobId,
+        ReorderJobChecklistRequest request,
         CancellationToken cancellationToken = default);
 }

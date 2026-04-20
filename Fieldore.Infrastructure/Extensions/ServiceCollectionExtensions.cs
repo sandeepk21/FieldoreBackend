@@ -1,10 +1,12 @@
 using Fieldore.Application.Auth.Contracts;
 using Fieldore.Application.Customers.Contracts;
+using Fieldore.Application.Invoices.Contracts;
 using Fieldore.Application.Jobs.Contracts;
 using Fieldore.Application.Locations.Contracts;
 using Fieldore.Infrastructure.Auth;
 using Fieldore.Infrastructure.Customers;
 using Fieldore.Infrastructure.Data;
+using Fieldore.Infrastructure.Invoices;
 using Fieldore.Infrastructure.Jobs;
 using Fieldore.Infrastructure.Locations;
 using Microsoft.EntityFrameworkCore;
@@ -28,6 +30,7 @@ public static class ServiceCollectionExtensions
 
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<ICustomerService, CustomerService>();
+        services.AddScoped<IInvoiceService, InvoiceService>();
         services.AddScoped<IJobService, JobService>();
         services.AddScoped<ILocationLookupService, LocationLookupService>();
         services.AddScoped<IPasswordHasher, PasswordHasher>();

@@ -8,7 +8,8 @@ public sealed class FieldoreDbContextFactory : IDesignTimeDbContextFactory<Field
     public FieldoreDbContext CreateDbContext(string[] args)
     {
         var optionsBuilder = new DbContextOptionsBuilder<FieldoreDbContext>();
-        var connectionString ="Data Source=sql.bsite.net\\MSSQL2016;User ID=samuelpaty_fieldore;Password=Sandeep@456890;Pooling=False;Connect Timeout=30;Encrypt=False;Trust Server Certificate=True;Authentication=SqlPassword;";
+        //var connectionString ="Data Source=sql.bsite.net\\MSSQL2016;User ID=samuelpaty_fieldore;Password=Sandeep@456890;Pooling=False;Connect Timeout=30;Encrypt=False;Trust Server Certificate=True;Authentication=SqlPassword;";
+        var connectionString = "Data Source=.;Database=Fieldore;Trusted_Connection=True;TrustServerCertificate=True;";
 
         optionsBuilder.UseSqlServer(connectionString);
 

@@ -68,10 +68,15 @@ public sealed record ReplaceJobChecklistRequest(
 
 public sealed record AddJobNoteRequest(string Body);
 
+public sealed record UpdateJobNoteRequest(string Body);
+
 public sealed record AddJobPhotoRequest(
     string StoragePath,
     string? Caption,
     DateTimeOffset? TakenAt);
+
+public sealed record ReorderJobChecklistRequest(
+    List<Guid>? ChecklistItemIds);
 
 public sealed class GetJobsRequest
 {

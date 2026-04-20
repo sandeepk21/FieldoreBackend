@@ -106,7 +106,7 @@ public sealed class CustomerService(FieldoreDbContext dbContext) : ICustomerServ
 
         if (!string.IsNullOrWhiteSpace(request.City))
         {
-            query = query.Where(x => x.Addresses.Any(a => a.Address.City == request.City));
+            query = query.Where(x => x.Addresses.Any(a => a.Address.City.ToLower().Contains(request.City.ToLower())));
         }
 
         if (!string.IsNullOrWhiteSpace(request.State))

@@ -73,3 +73,7 @@ public sealed record JobResponse(
     DateTimeOffset UpdatedAt);
 
 public sealed record DeleteJobResponse(Guid JobId, string Message);
+
+public sealed record DeleteJobNoteResponse(Guid NoteId, string Message);
+
+public sealed record DeleteJobPhotoResponse(Guid PhotoId, string Message);

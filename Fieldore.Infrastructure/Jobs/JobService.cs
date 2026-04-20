@@ -456,6 +456,96 @@ public sealed class JobService(FieldoreDbContext dbContext) : IJobService
         return ApiResponse<JobNoteResponse>.Create(response, true, "Job note added successfully", 201);
     }
 
+    public async Task<ApiResponse<JobNoteResponse>> UpdateNoteAsync(
+        Guid userId,
+        Guid jobId,
+        Guid noteId,
+        UpdateJobNoteRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        var businessId = await GetBusinessIdAsync(userId, cancellationToken);
+        if (businessId is null)
+        {
+            return ApiResponse<JobNoteResponse>.Create(null, false, "Business not found for user", 404);
+        }
+
+        if (string.IsNullOrWhiteSpace(request.Body))
+        {
+            return ApiResponse<JobNoteResponse>.Create(null, false, "Note body is required", 400);
+        }
+
+        var note = await dbContext.JobNotes
+            .FirstOrDefaultAsync(x => x.Id == noteId && x.JobId == jobId, cancellationToken);
+
+        if (note is null)
+        {
+            return ApiResponse<JobNoteResponse>.Create(null, false, "Job note not found", 404);
+        }
+
+        var jobExists = await dbContext.Jobs
+            .AnyAsync(x => x.Id == jobId && x.BusinessId == businessId.Value, cancellationToken);
+
+        if (!jobExists)
+        {
+            return ApiResponse<JobNoteResponse>.Create(null, false, "Job not found", 404);
+        }
+
+        note.Body = request.Body.Trim();
+        await dbContext.SaveChangesAsync(cancellationToken);
+
+        AppUserProfile? noteProfile = null;
+        if (note.CreatedByUserId.HasValue)
+        {
+            noteProfile = await dbContext.UserProfiles
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Id == note.CreatedByUserId.Value, cancellationToken);
+        }
+
+        var response = new JobNoteResponse(
+            note.Id,
+            note.CreatedByUserId,
+            note.Body,
+            note.CreatedAt,
+            BuildProfileDisplayName(noteProfile));
+
+        return ApiResponse<JobNoteResponse>.Create(response, true, "Job note updated successfully", 200);
+    }
+
+    public async Task<ApiResponse<DeleteJobNoteResponse>> DeleteNoteAsync(
+        Guid userId,
+        Guid jobId,
+        Guid noteId,
+        CancellationToken cancellationToken = default)
+    {
+        var businessId = await GetBusinessIdAsync(userId, cancellationToken);
+        if (businessId is null)
+        {
+            return ApiResponse<DeleteJobNoteResponse>.Create(null, false, "Business not found for user", 404);
+        }
+
+        var jobExists = await dbContext.Jobs
+            .AnyAsync(x => x.Id == jobId && x.BusinessId == businessId.Value, cancellationToken);
+
+        if (!jobExists)
+        {
+            return ApiResponse<DeleteJobNoteResponse>.Create(null, false, "Job not found", 404);
+        }
+
+        var note = await dbContext.JobNotes
+            .FirstOrDefaultAsync(x => x.Id == noteId && x.JobId == jobId, cancellationToken);
+
+        if (note is null)
+        {
+            return ApiResponse<DeleteJobNoteResponse>.Create(null, false, "Job note not found", 404);
+        }
+
+        dbContext.JobNotes.Remove(note);
+        await dbContext.SaveChangesAsync(cancellationToken);
+
+        var response = new DeleteJobNoteResponse(noteId, "Job note deleted successfully");
+        return ApiResponse<DeleteJobNoteResponse>.Create(response, true, "Job note deleted successfully", 200);
+    }
+
     public async Task<ApiResponse<JobPhotoResponse>> AddPhotoAsync(
         Guid userId,
         Guid jobId,
@@ -504,6 +594,96 @@ public sealed class JobService(FieldoreDbContext dbContext) : IJobService
             photo.CreatedAt);
 
         return ApiResponse<JobPhotoResponse>.Create(response, true, "Job photo added successfully", 201);
+    }
+
+    public async Task<ApiResponse<DeleteJobPhotoResponse>> DeletePhotoAsync(
+        Guid userId,
+        Guid jobId,
+        Guid photoId,
+        CancellationToken cancellationToken = default)
+    {
+        var businessId = await GetBusinessIdAsync(userId, cancellationToken);
+        if (businessId is null)
+        {
+            return ApiResponse<DeleteJobPhotoResponse>.Create(null, false, "Business not found for user", 404);
+        }
+
+        var jobExists = await dbContext.Jobs
+            .AnyAsync(x => x.Id == jobId && x.BusinessId == businessId.Value, cancellationToken);
+
+        if (!jobExists)
+        {
+            return ApiResponse<DeleteJobPhotoResponse>.Create(null, false, "Job not found", 404);
+        }
+
+        var photo = await dbContext.JobPhotos
+            .FirstOrDefaultAsync(x => x.Id == photoId && x.JobId == jobId, cancellationToken);
+
+        if (photo is null)
+        {
+            return ApiResponse<DeleteJobPhotoResponse>.Create(null, false, "Job photo not found", 404);
+        }
+
+        dbContext.JobPhotos.Remove(photo);
+        await dbContext.SaveChangesAsync(cancellationToken);
+
+        var response = new DeleteJobPhotoResponse(photoId, "Job photo deleted successfully");
+        return ApiResponse<DeleteJobPhotoResponse>.Create(response, true, "Job photo deleted successfully", 200);
+    }
+
+    public async Task<ApiResponse<JobResponse>> ReorderChecklistAsync(
+        Guid userId,
+        Guid jobId,
+        ReorderJobChecklistRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        var businessId = await GetBusinessIdAsync(userId, cancellationToken);
+        if (businessId is null)
+        {
+            return ApiResponse<JobResponse>.Create(null, false, "Business not found for user", 404);
+        }
+
+        var jobExists = await dbContext.Jobs
+            .AnyAsync(x => x.Id == jobId && x.BusinessId == businessId.Value, cancellationToken);
+
+        if (!jobExists)
+        {
+            return ApiResponse<JobResponse>.Create(null, false, "Job not found", 404);
+        }
+
+        var reorderValidation = ValidateChecklistReorderRequest(request.ChecklistItemIds);
+        if (reorderValidation is not null)
+        {
+            return ApiResponse<JobResponse>.Create(null, false, reorderValidation, 400);
+        }
+
+        var checklistItems = await dbContext.JobChecklistItems
+            .Where(x => x.JobId == jobId)
+            .OrderBy(x => x.SortOrder)
+            .ThenBy(x => x.CreatedAt)
+            .ToListAsync(cancellationToken);
+
+        var requestedIds = request.ChecklistItemIds!;
+        if (checklistItems.Count != requestedIds.Count)
+        {
+            return ApiResponse<JobResponse>.Create(null, false, "Checklist reorder request must include all checklist item ids", 400);
+        }
+
+        var existingIds = checklistItems.Select(x => x.Id).ToHashSet();
+        if (requestedIds.Any(x => !existingIds.Contains(x)))
+        {
+            return ApiResponse<JobResponse>.Create(null, false, "Checklist reorder request contains invalid checklist item ids", 400);
+        }
+
+        var itemsById = checklistItems.ToDictionary(x => x.Id);
+        for (var index = 0; index < requestedIds.Count; index++)
+        {
+            itemsById[requestedIds[index]].SortOrder = index + 1;
+        }
+
+        await dbContext.SaveChangesAsync(cancellationToken);
+
+        return await GetByIdAsync(userId, jobId, cancellationToken);
     }
 
     private async Task<List<JobResponse>> BuildJobResponsesAsync(
@@ -942,6 +1122,21 @@ public sealed class JobService(FieldoreDbContext dbContext) : IJobService
         return null;
     }
 
+    private static string? ValidateChecklistReorderRequest(List<Guid>? checklistItemIds)
+    {
+        if (checklistItemIds is null || checklistItemIds.Count == 0)
+        {
+            return "Checklist item ids are required";
+        }
+
+        if (checklistItemIds.GroupBy(x => x).Any(x => x.Count() > 1))
+        {
+            return "Checklist item ids must be unique";
+        }
+
+        return null;
+    }
+
     private static string? ValidateAddress(JobAddressRequest? address)
     {
         if (address is null)
@@ -964,7 +1159,7 @@ public sealed class JobService(FieldoreDbContext dbContext) : IJobService
     private static bool IsValidPriority(string priority)
     {
         var normalized = NormalizePriority(priority);
-        return normalized is JobPriorities.Normal or JobPriorities.Urgent;
+        return normalized is JobPriorities.Normal or JobPriorities.Urgent or JobPriorities.High or JobPriorities.Low;
     }
 
     private static bool IsValidStatus(string status)
