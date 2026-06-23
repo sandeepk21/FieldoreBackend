@@ -137,6 +137,14 @@ namespace Fieldore.Infrastructure.Migrations
                         .HasColumnType("datetimeoffset")
                         .HasColumnName("created_at");
 
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(8)
+                        .HasColumnType("nvarchar(8)")
+                        .HasDefaultValue("USD")
+                        .HasColumnName("currency");
+
                     b.Property<string>("Email")
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("email");
@@ -153,6 +161,16 @@ namespace Fieldore.Infrastructure.Migrations
                     b.Property<string>("Phone")
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("phone");
+
+                    b.Property<string>("StripeAccountId")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("stripe_account_id");
+
+                    b.Property<bool>("StripeOnboardingComplete")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false)
+                        .HasColumnName("stripe_onboarding_complete");
 
                     b.Property<string>("TradeType")
                         .HasColumnType("nvarchar(max)")
@@ -544,6 +562,10 @@ namespace Fieldore.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("business_id");
 
+                    b.Property<Guid?>("ConvertedJobId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("converted_job_id");
+
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetimeoffset")
                         .HasColumnName("created_at");
@@ -561,6 +583,26 @@ namespace Fieldore.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("customer_name_snapshot");
 
+                    b.Property<decimal>("DepositAmount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("decimal(18,2)")
+                        .HasDefaultValue(0m)
+                        .HasColumnName("deposit_amount");
+
+                    b.Property<string>("DepositType")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(16)
+                        .HasColumnType("nvarchar(16)")
+                        .HasDefaultValue("none")
+                        .HasColumnName("deposit_type");
+
+                    b.Property<decimal>("DepositValue")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("decimal(18,2)")
+                        .HasDefaultValue(0m)
+                        .HasColumnName("deposit_value");
+
                     b.Property<decimal>("DiscountAmount")
                         .HasColumnType("decimal(18,2)")
                         .HasColumnName("discount_amount");
@@ -574,6 +616,10 @@ namespace Fieldore.Infrastructure.Migrations
                         .HasColumnType("date")
                         .HasColumnName("expires_on");
 
+                    b.Property<string>("InternalNotes")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("internal_notes");
+
                     b.Property<DateOnly>("IssuedOn")
                         .HasColumnType("date")
                         .HasColumnName("issued_on");
@@ -581,6 +627,18 @@ namespace Fieldore.Infrastructure.Migrations
                     b.Property<string>("Notes")
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("notes");
+
+                    b.Property<Guid?>("PublicToken")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("public_token");
+
+                    b.Property<DateTimeOffset?>("RespondedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("responded_at");
+
+                    b.Property<DateTimeOffset?>("SentAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("sent_at");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -599,6 +657,10 @@ namespace Fieldore.Infrastructure.Migrations
                         .HasColumnType("decimal(18,2)")
                         .HasColumnName("tax_rate");
 
+                    b.Property<string>("Title")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("title");
+
                     b.Property<decimal>("TotalAmount")
                         .HasColumnType("decimal(18,2)")
                         .HasColumnName("total_amount");
@@ -609,10 +671,62 @@ namespace Fieldore.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("PublicToken")
+                        .IsUnique()
+                        .HasFilter("[public_token] IS NOT NULL");
+
                     b.HasIndex("BusinessId", "EstimateNumber")
                         .IsUnique();
 
                     b.ToTable("estimates", (string)null);
+                });
+
+            modelBuilder.Entity("Fieldore.Domain.Entities.EstimateAttachment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ContentType")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("content_type");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid>("EstimateId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("estimate_id");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("file_name");
+
+                    b.Property<long>("FileSizeBytes")
+                        .HasColumnType("bigint")
+                        .HasColumnName("file_size_bytes");
+
+                    b.Property<string>("StoragePath")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("storage_path");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UploadedByUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("uploaded_by_user_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EstimateId")
+                        .HasDatabaseName("ix_estimate_attachments_estimate");
+
+                    b.ToTable("estimate_attachments", (string)null);
                 });
 
             modelBuilder.Entity("Fieldore.Domain.Entities.EstimateLineItem", b =>
@@ -663,6 +777,71 @@ namespace Fieldore.Infrastructure.Migrations
                     b.HasIndex("EstimateId");
 
                     b.ToTable("estimate_line_items", (string)null);
+                });
+
+            modelBuilder.Entity("Fieldore.Domain.Entities.Expense", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("amount");
+
+                    b.Property<Guid>("BusinessId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("business_id");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("category");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)")
+                        .HasColumnName("description");
+
+                    b.Property<DateOnly>("ExpenseDate")
+                        .HasColumnType("date")
+                        .HasColumnName("expense_date");
+
+                    b.Property<Guid?>("InvoiceId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("invoice_id");
+
+                    b.Property<Guid?>("JobId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("job_id");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("notes");
+
+                    b.Property<string>("ReferenceNumber")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("reference_number");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("VendorName")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)")
+                        .HasColumnName("vendor_name");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("expenses", (string)null);
                 });
 
             modelBuilder.Entity("Fieldore.Domain.Entities.Invoice", b =>
@@ -869,6 +1048,10 @@ namespace Fieldore.Infrastructure.Migrations
                         .HasColumnType("datetimeoffset")
                         .HasColumnName("scheduled_start_at");
 
+                    b.Property<Guid?>("SourceEstimateId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("source_estimate_id");
+
                     b.Property<Guid?>("SourceLeadId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("source_lead_id");
@@ -977,6 +1160,57 @@ namespace Fieldore.Infrastructure.Migrations
                     b.HasIndex("JobId");
 
                     b.ToTable("job_checklist_items", (string)null);
+                });
+
+            modelBuilder.Entity("Fieldore.Domain.Entities.JobLineItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("description");
+
+                    b.Property<Guid>("JobId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("job_id");
+
+                    b.Property<decimal>("LineTotal")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("line_total");
+
+                    b.Property<decimal>("Quantity")
+                        .HasColumnType("decimal(18,4)")
+                        .HasColumnName("quantity");
+
+                    b.Property<string>("ServiceName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)")
+                        .HasColumnName("service_name");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("int")
+                        .HasColumnName("sort_order");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("unit_price");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("JobId");
+
+                    b.ToTable("job_line_items", (string)null);
                 });
 
             modelBuilder.Entity("Fieldore.Domain.Entities.JobNote", b =>
@@ -2534,6 +2768,15 @@ namespace Fieldore.Infrastructure.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Fieldore.Domain.Entities.JobLineItem", b =>
+                {
+                    b.HasOne("Fieldore.Domain.Entities.Job", null)
+                        .WithMany("LineItems")
+                        .HasForeignKey("JobId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Fieldore.Domain.Entities.JobNote", b =>
                 {
                     b.HasOne("Fieldore.Domain.Entities.Job", null)
@@ -2617,6 +2860,8 @@ namespace Fieldore.Infrastructure.Migrations
                     b.Navigation("Assignments");
 
                     b.Navigation("ChecklistItems");
+
+                    b.Navigation("LineItems");
 
                     b.Navigation("Notes");
 

@@ -130,6 +130,20 @@ public sealed class JobsController(IJobService jobService, IWebHostEnvironment e
         return await jobService.ReplaceChecklistAsync(userId, jobId, request, cancellationToken);
     }
 
+    [HttpPut("replace-line-items/{jobId:guid}")]
+    public async Task<ActionResult<ApiResponse<JobResponse>>> ReplaceLineItems(
+        Guid jobId,
+        [FromBody] ReplaceJobLineItemsRequest request,
+        CancellationToken cancellationToken)
+    {
+        if (!TryGetUserId(out var userId))
+        {
+            return Unauthorized(ApiResponse<JobResponse>.Create(null, false, "Invalid token", 401));
+        }
+
+        return await jobService.ReplaceLineItemsAsync(userId, jobId, request, cancellationToken);
+    }
+
     [HttpPost("add-note/{jobId:guid}")]
     public async Task<ActionResult<ApiResponse<JobNoteResponse>>> AddNote(
         Guid jobId,

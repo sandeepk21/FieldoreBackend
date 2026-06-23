@@ -215,6 +215,10 @@ public sealed class AuthService(
             alreadyExists.Address.StateOrProvince = request.StateOrProvince;
             alreadyExists.Address.PostalCode = request.PostalCode;
             alreadyExists.Address.Country = request.Country;
+            if (!string.IsNullOrWhiteSpace(request.Currency))
+            {
+                alreadyExists.Currency = NormalizeCurrencyCode(request.Currency);
+            }
             alreadyExists.UpdatedAt = DateTimeOffset.UtcNow;
             if (string.IsNullOrWhiteSpace(profile.Phone))
             {
@@ -246,6 +250,7 @@ public sealed class AuthService(
             TradeType = request.TradeType,
             Phone = request.Phone,
             Email = profile.Email, // optional mapping
+            Currency = NormalizeCurrencyCode(request.Currency),
 
             Address = new Address()
             {
@@ -327,7 +332,8 @@ public sealed class AuthService(
                 Country = business.Address?.Country
             },
 
-            TimeZone = profile?.TimeZone
+            TimeZone = profile?.TimeZone,
+            Currency = string.IsNullOrWhiteSpace(business.Currency) ? "USD" : business.Currency
         };
 
         return ApiResponse<BusinessDetailsResponse>.Create(
@@ -351,6 +357,11 @@ public sealed class AuthService(
         return Task.FromResult(
             ApiResponse<ForgotPasswordResponse>.Create(
                 response, true, "Request processed", 200));
+    }
+
+    private static string NormalizeCurrencyCode(string? code)
+    {
+        return string.IsNullOrWhiteSpace(code) ? "USD" : code.Trim().ToUpperInvariant();
     }
 
     private async Task EnsureEmailIsAvailableAsync(string email, CancellationToken cancellationToken)

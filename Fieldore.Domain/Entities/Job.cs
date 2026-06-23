@@ -8,6 +8,7 @@ public sealed class Job : AuditableEntity
     public Guid BusinessId { get; set; }
     public Guid CustomerId { get; set; }
     public Guid? SourceLeadId { get; set; }
+    public Guid? SourceEstimateId { get; set; }
     public string JobNumber { get; set; } = string.Empty;
     public string Title { get; set; } = string.Empty;
     public string? JobType { get; set; }
@@ -21,6 +22,7 @@ public sealed class Job : AuditableEntity
     public bool UseCustomerPrimaryAddress { get; set; } = true;
     public Address? ServiceAddress { get; set; }
     public string? Description { get; set; }
+    public List<JobLineItem> LineItems { get; set; } = [];
     public List<JobAssignment> Assignments { get; set; } = [];
     public List<JobChecklistItem> ChecklistItems { get; set; } = [];
     public List<JobNote> Notes { get; set; } = [];

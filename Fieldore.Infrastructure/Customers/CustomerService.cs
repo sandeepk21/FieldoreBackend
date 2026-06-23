@@ -71,7 +71,16 @@ public sealed class CustomerService(FieldoreDbContext dbContext) : ICustomerServ
         }
 
         dbContext.Customers.Add(customer);
-        await dbContext.SaveChangesAsync(cancellationToken);
+
+        try
+        {
+            await dbContext.SaveChangesAsync(cancellationToken);
+        }
+        catch (Microsoft.EntityFrameworkCore.DbUpdateException)
+        {
+            return ApiResponse<CustomerResponse>.Create(
+                null, false, "A customer with this mobile phone or email already exists", 409);
+        }
 
         return ApiResponse<CustomerResponse>.Create(
             MapCustomerResponse(customer), true, "Customer created successfully", 201);
@@ -138,7 +147,7 @@ public sealed class CustomerService(FieldoreDbContext dbContext) : ICustomerServ
             .ToListAsync(cancellationToken);
 
         var responseData = customers
-            .Select(MapCustomerResponse)
+            .Select(customer => MapCustomerResponse(customer))
             .ToList();
 
         var pagedResponse = new PagedResponse<CustomerResponse>
@@ -178,8 +187,51 @@ public sealed class CustomerService(FieldoreDbContext dbContext) : ICustomerServ
                 null, false, "Customer not found", 404);
         }
 
+        var customerNotes = await dbContext.CustomerNotes
+            .AsNoTracking()
+            .Where(x => x.CustomerId == customer.Id)
+            .OrderByDescending(x => x.CreatedAt)
+            .ToListAsync(cancellationToken);
+
+        var jobs = await dbContext.Jobs
+            .AsNoTracking()
+            .Where(x => x.BusinessId == businessId.Value && x.CustomerId == customer.Id)
+            .OrderByDescending(x => x.ScheduledStartAt)
+            .ThenByDescending(x => x.CreatedAt)
+            .ToListAsync(cancellationToken);
+
+        var invoices = await dbContext.Invoices
+            .AsNoTracking()
+            .Where(x => x.BusinessId == businessId.Value && x.CustomerId == customer.Id)
+            .OrderByDescending(x => x.IssuedOn)
+            .ThenByDescending(x => x.CreatedAt)
+            .ToListAsync(cancellationToken);
+
+        var estimates = await dbContext.Estimates
+            .AsNoTracking()
+            .Where(x => x.BusinessId == businessId.Value && x.CustomerId == customer.Id)
+            .OrderByDescending(x => x.IssuedOn)
+            .ThenByDescending(x => x.CreatedAt)
+            .ToListAsync(cancellationToken);
+
+        var noteAuthorIds = customerNotes
+            .Where(x => x.CreatedByUserId.HasValue)
+            .Select(x => x.CreatedByUserId!.Value)
+            .Distinct()
+            .ToList();
+
+        var profiles = noteAuthorIds.Count == 0
+            ? new Dictionary<Guid, AppUserProfile>()
+            : await dbContext.UserProfiles
+                .AsNoTracking()
+                .Where(x => noteAuthorIds.Contains(x.Id))
+                .ToDictionaryAsync(x => x.Id, cancellationToken);
+
         return ApiResponse<CustomerResponse>.Create(
-            MapCustomerResponse(customer), true, "Customer fetched successfully", 200);
+            MapDetailedCustomerResponse(customer, customerNotes, jobs, invoices, estimates, profiles),
+            true,
+            "Customer fetched successfully",
+            200);
     }
 
     public async Task<ApiResponse<CustomerResponse>> UpdateAsync(Guid userId, Guid customerId,
@@ -240,7 +292,7 @@ public sealed class CustomerService(FieldoreDbContext dbContext) : ICustomerServ
         customer.PetsNote = NormalizeOptional(request.PetsNote);
         customer.InternalNotes = NormalizeOptional(request.InternalNotes);
         customer.BillingSameAsService = request.BillingSameAsService;
-        // ADD this:
+
         await dbContext.CustomerAddresses
             .Where(x => x.CustomerId == customer.Id)
             .ExecuteDeleteAsync(cancellationToken);
@@ -248,7 +300,15 @@ public sealed class CustomerService(FieldoreDbContext dbContext) : ICustomerServ
 
         await dbContext.CustomerAddresses.AddRangeAsync(newAddresses, cancellationToken);
 
-        await dbContext.SaveChangesAsync(cancellationToken);
+        try
+        {
+            await dbContext.SaveChangesAsync(cancellationToken);
+        }
+        catch (Microsoft.EntityFrameworkCore.DbUpdateException)
+        {
+            return ApiResponse<CustomerResponse>.Create(
+                null, false, "A customer with this mobile phone or email already exists", 409);
+        }
 
         return ApiResponse<CustomerResponse>.Create(
             MapCustomerResponse(customer), true, "Customer updated successfully", 200);
@@ -280,7 +340,11 @@ public sealed class CustomerService(FieldoreDbContext dbContext) : ICustomerServ
         customer.IsActive = false;
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        var response = new DeleteCustomerResponse(customer.Id, "Customer deleted successfully");
+        var response = new DeleteCustomerResponse
+        {
+            CustomerId = customer.Id,
+            Message = "Customer deleted successfully"
+        };
 
         return ApiResponse<DeleteCustomerResponse>.Create(
             response, true, "Customer deleted successfully", 200);
@@ -364,43 +428,137 @@ public sealed class CustomerService(FieldoreDbContext dbContext) : ICustomerServ
             .ToList() ?? [];
     }
 
-    private static CustomerResponse MapCustomerResponse(Customer customer)
+    private static CustomerResponse MapCustomerResponse(
+        Customer customer)
+    {
+        return MapDetailedCustomerResponse(
+            customer,
+            [],
+            [],
+            [],
+            [],
+            new Dictionary<Guid, AppUserProfile>());
+    }
+
+    private static CustomerResponse MapDetailedCustomerResponse(
+        Customer customer,
+        List<CustomerNote> customerNotes,
+        List<Job> jobs,
+        List<Invoice> invoices,
+        List<Estimate> estimates,
+        IReadOnlyDictionary<Guid, AppUserProfile> profiles)
     {
         var addresses = customer.Addresses
             .OrderByDescending(x => x.IsPrimary)
             .ThenBy(x => x.Label)
-            .Select(x => new CustomerAddressResponse(
-                x.Id,
-                x.Label,
-                x.IsPrimary,
-                x.IsBilling,
-                x.Address.Line1,
-                x.Address.Line2,
-                x.Address.City,
-                x.Address.StateOrProvince,
-                x.Address.PostalCode,
-                x.Address.Country))
+            .Select(x => new CustomerAddressResponse
+            {
+                Id = x.Id,
+                Label = x.Label,
+                IsPrimary = x.IsPrimary,
+                IsBilling = x.IsBilling,
+                Line1 = x.Address.Line1,
+                Line2 = x.Address.Line2,
+                City = x.Address.City,
+                StateOrProvince = x.Address.StateOrProvince,
+                PostalCode = x.Address.PostalCode,
+                Country = x.Address.Country
+            })
             .ToList();
 
-        return new CustomerResponse(
-            customer.Id,
-            customer.BusinessId,
-            customer.Type,
-            customer.CompanyName,
-            customer.FirstName,
-            customer.LastName,
-            BuildDisplayName(customer.CompanyName, customer.FirstName, customer.LastName),
-            customer.Email,
-            customer.MobilePhone,
-            customer.AlternatePhone,
-            customer.GateCode,
-            customer.PetsNote,
-            customer.InternalNotes,
-            customer.BillingSameAsService,
-            customer.IsActive,
-            addresses,
-            customer.CreatedAt,
-            customer.UpdatedAt);
+        var notes = customerNotes
+            .Select(x =>
+            {
+                AppUserProfile? profile = null;
+                if (x.CreatedByUserId.HasValue)
+                {
+                    profiles.TryGetValue(x.CreatedByUserId.Value, out profile);
+                }
+
+                return new CustomerNoteResponse
+                {
+                    Id = x.Id,
+                    CreatedByUserId = x.CreatedByUserId,
+                    Body = x.Body,
+                    CreatedAt = x.CreatedAt,
+                    CreatedByDisplayName = BuildProfileDisplayName(profile)
+                };
+            })
+            .ToList();
+
+        var jobResponses = jobs
+            .Select(x => new CustomerJobSummaryResponse
+            {
+                Id = x.Id,
+                JobNumber = x.JobNumber,
+                Title = x.Title,
+                JobType = x.JobType,
+                Priority = x.Priority,
+                Status = x.Status,
+                ScheduledStartAt = x.ScheduledStartAt,
+                ScheduledEndAt = x.ScheduledEndAt,
+                CreatedAt = x.CreatedAt,
+                UpdatedAt = x.UpdatedAt
+            })
+            .ToList();
+
+        var invoiceResponses = invoices
+            .Select(x => new CustomerInvoiceSummaryResponse
+            {
+                Id = x.Id,
+                JobId = x.JobId,
+                InvoiceNumber = x.InvoiceNumber,
+                Status = x.Status,
+                IssuedOn = x.IssuedOn,
+                DueOn = x.DueOn,
+                TotalAmount = x.TotalAmount,
+                BalanceDueAmount = x.BalanceDueAmount,
+                Notes = x.Notes,
+                CreatedAt = x.CreatedAt,
+                UpdatedAt = x.UpdatedAt
+            })
+            .ToList();
+
+        var estimateResponses = estimates
+            .Select(x => new CustomerEstimateSummaryResponse
+            {
+                Id = x.Id,
+                EstimateNumber = x.EstimateNumber,
+                Status = x.Status,
+                IssuedOn = x.IssuedOn,
+                ExpiresOn = x.ExpiresOn,
+                TotalAmount = x.TotalAmount,
+                Notes = x.Notes,
+                CreatedAt = x.CreatedAt,
+                UpdatedAt = x.UpdatedAt
+            })
+            .ToList();
+
+        return new CustomerResponse
+        {
+            Id = customer.Id,
+            BusinessId = customer.BusinessId,
+            Type = customer.Type,
+            CompanyName = customer.CompanyName,
+            FirstName = customer.FirstName,
+            LastName = customer.LastName,
+            DisplayName = BuildDisplayName(customer.CompanyName, customer.FirstName, customer.LastName),
+            Email = customer.Email,
+            MobilePhone = customer.MobilePhone,
+            AlternatePhone = customer.AlternatePhone,
+            GateCode = customer.GateCode,
+            PetsNote = customer.PetsNote,
+            InternalNotes = customer.InternalNotes,
+            BillingSameAsService = customer.BillingSameAsService,
+            IsActive = customer.IsActive,
+            Addresses = addresses,
+            Notes = notes,
+            Jobs = jobResponses,
+            Invoices = invoiceResponses,
+            Estimates = estimateResponses,
+            CreatedAt = customer.CreatedAt,
+            UpdatedAt = customer.UpdatedAt
+        };
     }
 
     private static string BuildDisplayName(string? companyName, string firstName, string lastName)
@@ -414,6 +572,22 @@ public sealed class CustomerService(FieldoreDbContext dbContext) : ICustomerServ
     private static string NormalizeCustomerType(string type)
     {
         return type.Trim().ToLowerInvariant();
+    }
+
+    private static string? BuildProfileDisplayName(AppUserProfile? profile)
+    {
+        if (profile is null)
+        {
+            return null;
+        }
+
+        if (!string.IsNullOrWhiteSpace(profile.DisplayName))
+        {
+            return profile.DisplayName.Trim();
+        }
+
+        var fullName = $"{profile.FirstName} {profile.LastName}".Trim();
+        return string.IsNullOrWhiteSpace(fullName) ? profile.Email : fullName;
     }
 
     private static string? NormalizeOptional(string? value)
@@ -436,8 +610,7 @@ public sealed class CustomerService(FieldoreDbContext dbContext) : ICustomerServ
             .AnyAsync(x =>
                     x.BusinessId == businessId &&
                     x.IsActive &&
-                    x.MobilePhone == mobilePhone &&
-                    (email == null || x.Email == email) &&
+                    (x.MobilePhone == mobilePhone || (email != null && x.Email == email)) &&
                     (excludeCustomerId == null || x.Id != excludeCustomerId),
                 cancellationToken);
     }

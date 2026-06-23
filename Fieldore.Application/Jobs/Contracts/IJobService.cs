@@ -84,4 +84,10 @@ public interface IJobService
         Guid jobId,
         ReorderJobChecklistRequest request,
         CancellationToken cancellationToken = default);
+
+    Task<ApiResponse<JobResponse>> ReplaceLineItemsAsync(
+        Guid userId,
+        Guid jobId,
+        ReplaceJobLineItemsRequest request,
+        CancellationToken cancellationToken = default);
 }

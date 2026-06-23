@@ -11,6 +11,8 @@ public class BusinessDetailsResponse
     public AddressDto? Address { get; set; }
 
     public string? TimeZone { get; set; }
+
+    public string? Currency { get; set; }
 }
 
 public class AddressDto

@@ -307,7 +307,7 @@ public sealed class InvoiceService(FieldoreDbContext dbContext) : IInvoiceServic
         if (!IsValidStatus(request.Status))
         {
             return ApiResponse<InvoiceResponse>.Create(
-                null, false, "Invoice status must be draft, sent, unpaid, paid, overdue, or void", 400);
+                null, false, "Invoice status must be draft, sent, viewed, partially_paid, paid, overdue, or void", 400);
         }
 
         var invoice = await dbContext.Invoices
@@ -385,6 +385,12 @@ public sealed class InvoiceService(FieldoreDbContext dbContext) : IInvoiceServic
             .Where(x => invoiceIds.Contains(x.InvoiceId))
             .ToListAsync(cancellationToken);
 
+        var paymentRecords = await dbContext.PaymentRecords
+            .AsNoTracking()
+            .Where(x => invoiceIds.Contains(x.InvoiceId))
+            .OrderBy(x => x.PaidAt)
+            .ToListAsync(cancellationToken);
+
         return invoices
             .OrderByDescending(x => x.IssuedOn)
             .ThenByDescending(x => x.CreatedAt)
@@ -404,6 +410,15 @@ public sealed class InvoiceService(FieldoreDbContext dbContext) : IInvoiceServic
                         x.Quantity,
                         x.UnitRate,
                         x.LineTotal))
+                    .ToList();
+
+                var responsePayments = paymentRecords
+                    .Where(x => x.InvoiceId == invoice.Id)
+                    .Select(x => new PaymentRecordResponse(
+                        x.Id, x.Amount, x.Method, x.PaidAt,
+                        x.ReferenceNumber, x.Notes,
+                        x.Method == "stripe",
+                        x.CreatedAt))
                     .ToList();
 
                 return new InvoiceResponse(
@@ -435,6 +450,7 @@ public sealed class InvoiceService(FieldoreDbContext dbContext) : IInvoiceServic
                             customer.Email,
                             customer.MobilePhone),
                     responseLineItems,
+                    responsePayments,
                     invoice.CreatedAt,
                     invoice.UpdatedAt);
             })
@@ -525,7 +541,7 @@ public sealed class InvoiceService(FieldoreDbContext dbContext) : IInvoiceServic
     {
         if (!IsValidStatus(status))
         {
-            return "Invoice status must be draft, sent, unpaid, paid, overdue, or void";
+            return "Invoice status must be draft, sent, viewed, partially_paid, paid, overdue, or void";
         }
 
         if (dueOn < issuedOn)
@@ -689,10 +705,12 @@ public sealed class InvoiceService(FieldoreDbContext dbContext) : IInvoiceServic
         var normalized = NormalizeStatus(status);
         return normalized is InvoiceStatuses.Draft
             or InvoiceStatuses.Sent
-            or InvoiceStatuses.Unpaid
+            or InvoiceStatuses.Viewed
+            or InvoiceStatuses.PartiallyPaid
             or InvoiceStatuses.Paid
             or InvoiceStatuses.Overdue
-            or InvoiceStatuses.Void;
+            or InvoiceStatuses.Void
+            or InvoiceStatuses.Unpaid;
     }
 
     private static string NormalizeStatus(string status)

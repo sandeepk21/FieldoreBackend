@@ -1,3 +1,4 @@
+using Fieldore.Domain.Constants;
 using Fieldore.Domain.Entities;
 using Fieldore.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
@@ -26,15 +27,18 @@ public sealed class FieldoreDbContext : DbContext
     public DbSet<StateProvince> StateProvinces => Set<StateProvince>();
     public DbSet<Lead> Leads => Set<Lead>();
     public DbSet<Job> Jobs => Set<Job>();
+    public DbSet<JobLineItem> JobLineItems => Set<JobLineItem>();
     public DbSet<JobAssignment> JobAssignments => Set<JobAssignment>();
     public DbSet<JobChecklistItem> JobChecklistItems => Set<JobChecklistItem>();
     public DbSet<JobNote> JobNotes => Set<JobNote>();
     public DbSet<JobPhoto> JobPhotos => Set<JobPhoto>();
     public DbSet<Estimate> Estimates => Set<Estimate>();
     public DbSet<EstimateLineItem> EstimateLineItems => Set<EstimateLineItem>();
+    public DbSet<EstimateAttachment> EstimateAttachments => Set<EstimateAttachment>();
     public DbSet<Invoice> Invoices => Set<Invoice>();
     public DbSet<InvoiceLineItem> InvoiceLineItems => Set<InvoiceLineItem>();
     public DbSet<PaymentRecord> PaymentRecords => Set<PaymentRecord>();
+    public DbSet<Expense> Expenses => Set<Expense>();
     public DbSet<UserNotificationPreference> UserNotificationPreferences => Set<UserNotificationPreference>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -59,6 +63,7 @@ public sealed class FieldoreDbContext : DbContext
         ConfigureEstimates(modelBuilder);
         ConfigureInvoices(modelBuilder);
         ConfigurePayments(modelBuilder);
+        ConfigureExpenses(modelBuilder);
         ConfigureNotificationPreferences(modelBuilder);
     }
 
@@ -151,6 +156,9 @@ public sealed class FieldoreDbContext : DbContext
         businesses.Property(x => x.Phone).HasColumnName("phone");
         businesses.Property(x => x.WebsiteUrl).HasColumnName("website_url");
         businesses.Property(x => x.LogoUrl).HasColumnName("logo_url");
+        businesses.Property(x => x.Currency).HasColumnName("currency").HasMaxLength(8).HasDefaultValue("USD");
+        businesses.Property(x => x.StripeAccountId).HasColumnName("stripe_account_id");
+        businesses.Property(x => x.StripeOnboardingComplete).HasColumnName("stripe_onboarding_complete").HasDefaultValue(false);
         businesses.HasIndex(x => x.AuthUserId).IsUnique();
         ConfigureAddress(businesses, x => x.Address, string.Empty);
         ConfigureAuditColumns(businesses);
@@ -306,6 +314,7 @@ public sealed class FieldoreDbContext : DbContext
         jobs.Property(x => x.BusinessId).HasColumnName("business_id");
         jobs.Property(x => x.CustomerId).HasColumnName("customer_id");
         jobs.Property(x => x.SourceLeadId).HasColumnName("source_lead_id");
+        jobs.Property(x => x.SourceEstimateId).HasColumnName("source_estimate_id");
         jobs.Property(x => x.JobNumber).HasColumnName("job_number");
         jobs.Property(x => x.Title).HasColumnName("title");
         jobs.Property(x => x.JobType).HasColumnName("job_type");
@@ -321,6 +330,18 @@ public sealed class FieldoreDbContext : DbContext
         jobs.HasIndex(x => new { x.BusinessId, x.JobNumber }).IsUnique();
         ConfigureAddress(jobs, x => x.ServiceAddress, string.Empty);
         ConfigureAuditColumns(jobs);
+
+        var lineItems = modelBuilder.Entity<JobLineItem>();
+        lineItems.ToTable("job_line_items");
+        lineItems.HasKey(x => x.Id);
+        lineItems.Property(x => x.JobId).HasColumnName("job_id");
+        lineItems.Property(x => x.SortOrder).HasColumnName("sort_order");
+        lineItems.Property(x => x.ServiceName).HasColumnName("service_name").HasMaxLength(200);
+        lineItems.Property(x => x.Description).HasColumnName("description");
+        lineItems.Property(x => x.Quantity).HasColumnName("quantity").HasColumnType("decimal(18,4)");
+        lineItems.Property(x => x.UnitPrice).HasColumnName("unit_price").HasColumnType("decimal(18,2)");
+        lineItems.Property(x => x.LineTotal).HasColumnName("line_total").HasColumnType("decimal(18,2)");
+        ConfigureAuditColumns(lineItems);
 
         var assignments = modelBuilder.Entity<JobAssignment>();
         assignments.ToTable("job_assignments");
@@ -377,10 +398,20 @@ public sealed class FieldoreDbContext : DbContext
         estimates.Property(x => x.SubtotalAmount).HasColumnName("subtotal_amount");
         estimates.Property(x => x.TaxAmount).HasColumnName("tax_amount");
         estimates.Property(x => x.TotalAmount).HasColumnName("total_amount");
+        estimates.Property(x => x.DepositType).HasColumnName("deposit_type").HasMaxLength(16).HasDefaultValue(EstimateDepositTypes.None);
+        estimates.Property(x => x.DepositValue).HasColumnName("deposit_value").HasDefaultValue(0m);
+        estimates.Property(x => x.DepositAmount).HasColumnName("deposit_amount").HasDefaultValue(0m);
+        estimates.Property(x => x.Title).HasColumnName("title");
         estimates.Property(x => x.Notes).HasColumnName("notes");
+        estimates.Property(x => x.InternalNotes).HasColumnName("internal_notes");
         estimates.Property(x => x.CustomerNameSnapshot).HasColumnName("customer_name_snapshot");
         estimates.Property(x => x.CustomerEmailSnapshot).HasColumnName("customer_email_snapshot");
+        estimates.Property(x => x.PublicToken).HasColumnName("public_token");
+        estimates.Property(x => x.SentAt).HasColumnName("sent_at");
+        estimates.Property(x => x.RespondedAt).HasColumnName("responded_at");
+        estimates.Property(x => x.ConvertedJobId).HasColumnName("converted_job_id");
         estimates.HasIndex(x => new { x.BusinessId, x.EstimateNumber }).IsUnique();
+        estimates.HasIndex(x => x.PublicToken).IsUnique().HasFilter("[public_token] IS NOT NULL");
         ConfigureAddress(estimates, x => x.BillingAddressSnapshot, "billing_");
         ConfigureAuditColumns(estimates);
 
@@ -395,6 +426,18 @@ public sealed class FieldoreDbContext : DbContext
         lines.Property(x => x.UnitPrice).HasColumnName("unit_price");
         lines.Property(x => x.LineTotal).HasColumnName("line_total");
         ConfigureAuditColumns(lines);
+
+        var attachments = modelBuilder.Entity<EstimateAttachment>();
+        attachments.ToTable("estimate_attachments");
+        attachments.HasKey(x => x.Id);
+        attachments.Property(x => x.EstimateId).HasColumnName("estimate_id");
+        attachments.Property(x => x.FileName).HasColumnName("file_name");
+        attachments.Property(x => x.StoragePath).HasColumnName("storage_path");
+        attachments.Property(x => x.ContentType).HasColumnName("content_type");
+        attachments.Property(x => x.FileSizeBytes).HasColumnName("file_size_bytes");
+        attachments.Property(x => x.UploadedByUserId).HasColumnName("uploaded_by_user_id");
+        attachments.HasIndex(x => x.EstimateId).HasDatabaseName("ix_estimate_attachments_estimate");
+        ConfigureAuditColumns(attachments);
     }
 
     private static void ConfigureInvoices(ModelBuilder modelBuilder)
@@ -450,6 +493,24 @@ public sealed class FieldoreDbContext : DbContext
         entity.Property(x => x.ReferenceNumber).HasColumnName("reference_number");
         entity.Property(x => x.Notes).HasColumnName("notes");
         entity.Property(x => x.RecordedByUserId).HasColumnName("recorded_by_user_id");
+        ConfigureAuditColumns(entity);
+    }
+
+    private static void ConfigureExpenses(ModelBuilder modelBuilder)
+    {
+        var entity = modelBuilder.Entity<Expense>();
+        entity.ToTable("expenses");
+        entity.HasKey(x => x.Id);
+        entity.Property(x => x.BusinessId).HasColumnName("business_id");
+        entity.Property(x => x.JobId).HasColumnName("job_id");
+        entity.Property(x => x.InvoiceId).HasColumnName("invoice_id");
+        entity.Property(x => x.Category).HasColumnName("category").HasMaxLength(50);
+        entity.Property(x => x.Description).HasColumnName("description").HasMaxLength(500);
+        entity.Property(x => x.Amount).HasColumnName("amount").HasColumnType("decimal(18,2)");
+        entity.Property(x => x.ExpenseDate).HasColumnName("expense_date");
+        entity.Property(x => x.VendorName).HasColumnName("vendor_name").HasMaxLength(200);
+        entity.Property(x => x.ReferenceNumber).HasColumnName("reference_number").HasMaxLength(100);
+        entity.Property(x => x.Notes).HasColumnName("notes");
         ConfigureAuditColumns(entity);
     }
 

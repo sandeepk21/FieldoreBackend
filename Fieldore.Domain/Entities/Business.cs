@@ -11,7 +11,10 @@ public sealed class Business : AuditableEntity
     public string? Phone { get; set; }
     public string? WebsiteUrl { get; set; }
     public string? LogoUrl { get; set; }
+    public string Currency { get; set; } = "USD";
     public Address? Address { get; set; }
     public List<BusinessMembership> Memberships { get; set; } = [];
     public List<ServiceCatalogItem> Services { get; set; } = [];
+    public string? StripeAccountId { get; set; }
+    public bool StripeOnboardingComplete { get; set; }
 }

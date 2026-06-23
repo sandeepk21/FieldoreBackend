@@ -59,6 +59,7 @@ public sealed class JobService(FieldoreDbContext dbContext) : IJobService
             BusinessId = business.Id,
             CustomerId = customer.Id,
             SourceLeadId = request.SourceLeadId,
+            SourceEstimateId = request.SourceEstimateId,
             JobNumber = await GenerateJobNumberAsync(business.Id, cancellationToken),
             Title = request.Title.Trim(),
             JobType = NormalizeOptional(request.JobType),
@@ -79,6 +80,7 @@ public sealed class JobService(FieldoreDbContext dbContext) : IJobService
 
         await ReplaceAssignmentsInternalAsync(job.Id, request.Assignments, cancellationToken);
         await ReplaceChecklistInternalAsync(job.Id, request.ChecklistItems, userId, cancellationToken);
+        await ReplaceLineItemsInternalAsync(job.Id, request.LineItems, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
 
         return await GetByIdAsync(userId, job.Id, cancellationToken);
@@ -258,6 +260,7 @@ public sealed class JobService(FieldoreDbContext dbContext) : IJobService
 
         job.CustomerId = request.CustomerId;
         job.SourceLeadId = request.SourceLeadId;
+        job.SourceEstimateId = request.SourceEstimateId;
         job.Title = request.Title.Trim();
         job.JobType = NormalizeOptional(request.JobType);
         job.Priority = NormalizePriority(request.Priority);
@@ -273,6 +276,8 @@ public sealed class JobService(FieldoreDbContext dbContext) : IJobService
 
         await ReplaceAssignmentsInternalAsync(job.Id, request.Assignments, cancellationToken);
         await ReplaceChecklistInternalAsync(job.Id, request.ChecklistItems, userId, cancellationToken);
+        if (request.LineItems is not null)
+            await ReplaceLineItemsInternalAsync(job.Id, request.LineItems, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
 
         return await GetByIdAsync(userId, job.Id, cancellationToken);
@@ -404,6 +409,28 @@ public sealed class JobService(FieldoreDbContext dbContext) : IJobService
         }
 
         await ReplaceChecklistInternalAsync(jobId, request.ChecklistItems, userId, cancellationToken);
+        await dbContext.SaveChangesAsync(cancellationToken);
+
+        return await GetByIdAsync(userId, jobId, cancellationToken);
+    }
+
+    public async Task<ApiResponse<JobResponse>> ReplaceLineItemsAsync(
+        Guid userId,
+        Guid jobId,
+        ReplaceJobLineItemsRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        var businessId = await GetBusinessIdAsync(userId, cancellationToken);
+        if (businessId is null)
+            return ApiResponse<JobResponse>.Create(null, false, "Business not found for user", 404);
+
+        var jobExists = await dbContext.Jobs
+            .AnyAsync(x => x.Id == jobId && x.BusinessId == businessId.Value, cancellationToken);
+
+        if (!jobExists)
+            return ApiResponse<JobResponse>.Create(null, false, "Job not found", 404);
+
+        await ReplaceLineItemsInternalAsync(jobId, request.LineItems, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
 
         return await GetByIdAsync(userId, jobId, cancellationToken);
@@ -723,6 +750,11 @@ public sealed class JobService(FieldoreDbContext dbContext) : IJobService
             .Where(x => jobIds.Contains(x.JobId))
             .ToListAsync(cancellationToken);
 
+        var jobLineItems = await dbContext.JobLineItems
+            .AsNoTracking()
+            .Where(x => jobIds.Contains(x.JobId))
+            .ToListAsync(cancellationToken);
+
         var profileIds = assignments.Select(x => x.UserProfileId)
             .Concat(notes.Where(x => x.CreatedByUserId.HasValue).Select(x => x.CreatedByUserId!.Value))
             .Distinct()
@@ -805,11 +837,20 @@ public sealed class JobService(FieldoreDbContext dbContext) : IJobService
                         x.CreatedAt))
                     .ToList();
 
+                var responseLineItems = jobLineItems
+                    .Where(x => x.JobId == job.Id)
+                    .OrderBy(x => x.SortOrder)
+                    .ThenBy(x => x.CreatedAt)
+                    .Select(x => new JobLineItemResponse(
+                        x.Id, x.SortOrder, x.ServiceName, x.Description, x.Quantity, x.UnitPrice, x.LineTotal))
+                    .ToList();
+
                 return new JobResponse(
                     job.Id,
                     job.BusinessId,
                     job.CustomerId,
                     job.SourceLeadId,
+                    job.SourceEstimateId,
                     job.JobNumber,
                     job.Title,
                     job.JobType,
@@ -828,6 +869,7 @@ public sealed class JobService(FieldoreDbContext dbContext) : IJobService
                         BuildCustomerDisplayName(customer),
                         customer.MobilePhone,
                         customer.Email),
+                    responseLineItems,
                     jobAssignments,
                     jobChecklist,
                     jobNotes,
@@ -897,6 +939,35 @@ public sealed class JobService(FieldoreDbContext dbContext) : IJobService
             .ToList();
 
         await dbContext.JobChecklistItems.AddRangeAsync(items, cancellationToken);
+    }
+
+    private async Task ReplaceLineItemsInternalAsync(
+        Guid jobId,
+        List<JobLineItemRequest>? lineItems,
+        CancellationToken cancellationToken)
+    {
+        await dbContext.JobLineItems
+            .Where(x => x.JobId == jobId)
+            .ExecuteDeleteAsync(cancellationToken);
+
+        if (lineItems is null || lineItems.Count == 0)
+            return;
+
+        var newItems = lineItems
+            .Select((x, index) => new JobLineItem
+            {
+                Id = Guid.NewGuid(),
+                JobId = jobId,
+                SortOrder = x.SortOrder > 0 ? x.SortOrder : index + 1,
+                ServiceName = x.ServiceName.Trim(),
+                Description = string.IsNullOrWhiteSpace(x.Description) ? null : x.Description.Trim(),
+                Quantity = x.Quantity,
+                UnitPrice = x.UnitPrice,
+                LineTotal = Math.Round(x.Quantity * x.UnitPrice, 2)
+            })
+            .ToList();
+
+        await dbContext.JobLineItems.AddRangeAsync(newItems, cancellationToken);
     }
 
     private async Task<Business?> GetBusinessAsync(Guid userId, CancellationToken cancellationToken)

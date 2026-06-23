@@ -31,6 +31,15 @@ public sealed record JobChecklistItemResponse(
     DateTimeOffset? CompletedAt,
     Guid? CompletedByUserId);
 
+public sealed record JobLineItemResponse(
+    Guid Id,
+    int SortOrder,
+    string ServiceName,
+    string? Description,
+    decimal Quantity,
+    decimal UnitPrice,
+    decimal LineTotal);
+
 public sealed record JobNoteResponse(
     Guid Id,
     Guid? CreatedByUserId,
@@ -51,6 +60,7 @@ public sealed record JobResponse(
     Guid BusinessId,
     Guid CustomerId,
     Guid? SourceLeadId,
+    Guid? SourceEstimateId,
     string JobNumber,
     string Title,
     string? JobType,
@@ -65,6 +75,7 @@ public sealed record JobResponse(
     JobAddressResponse? ServiceAddress,
     string? Description,
     JobCustomerSummaryResponse? Customer,
+    List<JobLineItemResponse> LineItems,
     List<JobAssignmentResponse> Assignments,
     List<JobChecklistItemResponse> ChecklistItems,
     List<JobNoteResponse> Notes,

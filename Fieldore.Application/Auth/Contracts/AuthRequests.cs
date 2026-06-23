@@ -14,7 +14,8 @@ public sealed record BusinessRegisterRequest(
     string StateOrProvince,
     string PostalCode,
     string Country,
-    string TimeZone
+    string TimeZone,
+    string? Currency = null
     );
 
 public sealed record ForgotPasswordRequest(string Email);

@@ -25,6 +25,16 @@ public sealed record InvoiceLineItemResponse(
     decimal UnitRate,
     decimal LineTotal);
 
+public sealed record PaymentRecordResponse(
+    Guid Id,
+    decimal Amount,
+    string Method,
+    DateTimeOffset PaidAt,
+    string? ReferenceNumber,
+    string? Notes,
+    bool IsStripePayment,
+    DateTimeOffset CreatedAt);
+
 public sealed record InvoiceResponse(
     Guid Id,
     Guid BusinessId,
@@ -48,6 +58,7 @@ public sealed record InvoiceResponse(
     InvoiceAddressResponse? BillingAddress,
     InvoiceCustomerSummaryResponse? Customer,
     List<InvoiceLineItemResponse> LineItems,
+    List<PaymentRecordResponse> Payments,
     DateTimeOffset CreatedAt,
     DateTimeOffset UpdatedAt);
 

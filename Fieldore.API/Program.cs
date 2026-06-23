@@ -1,8 +1,10 @@
 using System.Text;
+using System.Text.Json;
 using Fieldore.Application.Auth.Contracts;
 using Fieldore.Infrastructure.Data;
 using Fieldore.Infrastructure.Extensions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -79,6 +81,21 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
+
+app.UseExceptionHandler(errorApp =>
+{
+    errorApp.Run(async context =>
+    {
+        context.Response.StatusCode = 500;
+        context.Response.ContentType = "application/json";
+        var feature = context.Features.Get<IExceptionHandlerFeature>();
+        var message = app.Environment.IsDevelopment() && feature?.Error is not null
+            ? feature.Error.Message
+            : "An unexpected error occurred. Please try again.";
+        await context.Response.WriteAsync(
+            JsonSerializer.Serialize(new { success = false, message, statusCode = 500 }));
+    });
+});
 
 if (app.Environment.IsDevelopment())
 {

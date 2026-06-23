@@ -19,9 +19,17 @@ public sealed record JobChecklistItemRequest(
     string TaskName,
     bool IsCompleted);
 
+public sealed record JobLineItemRequest(
+    int SortOrder,
+    string ServiceName,
+    string? Description,
+    decimal Quantity,
+    decimal UnitPrice);
+
 public sealed record CreateJobRequest(
     Guid CustomerId,
     Guid? SourceLeadId,
+    Guid? SourceEstimateId,
     string Title,
     string? JobType,
     string Priority,
@@ -35,11 +43,13 @@ public sealed record CreateJobRequest(
     JobAddressRequest? ServiceAddress,
     string? Description,
     List<JobAssignmentRequest>? Assignments,
-    List<JobChecklistItemRequest>? ChecklistItems);
+    List<JobChecklistItemRequest>? ChecklistItems,
+    List<JobLineItemRequest>? LineItems = null);
 
 public sealed record UpdateJobRequest(
     Guid CustomerId,
     Guid? SourceLeadId,
+    Guid? SourceEstimateId,
     string Title,
     string? JobType,
     string Priority,
@@ -53,7 +63,11 @@ public sealed record UpdateJobRequest(
     JobAddressRequest? ServiceAddress,
     string? Description,
     List<JobAssignmentRequest>? Assignments,
-    List<JobChecklistItemRequest>? ChecklistItems);
+    List<JobChecklistItemRequest>? ChecklistItems,
+    List<JobLineItemRequest>? LineItems = null);
+
+public sealed record ReplaceJobLineItemsRequest(
+    List<JobLineItemRequest>? LineItems);
 
 public sealed record UpdateJobStatusRequest(
     string Status,
