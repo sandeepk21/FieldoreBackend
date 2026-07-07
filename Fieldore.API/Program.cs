@@ -1,10 +1,12 @@
 using System.Text;
 using System.Text.Json;
+using System.Threading.RateLimiting;
 using Fieldore.Application.Auth.Contracts;
 using Fieldore.Infrastructure.Data;
 using Fieldore.Infrastructure.Extensions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -78,7 +80,23 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ClockSkew = TimeSpan.Zero
         };
     });
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy(Fieldore.Domain.Constants.PlatformRoles.AdminPolicy, policy =>
+        policy.RequireClaim(Fieldore.Domain.Constants.PlatformRoles.IsPlatformAdminClaim, "true"));
+});
+
+// Rate limiting for anonymous/public endpoints (marketing pricing, etc.).
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.AddFixedWindowLimiter("public", limiter =>
+    {
+        limiter.PermitLimit = 100;
+        limiter.Window = TimeSpan.FromMinutes(1);
+        limiter.QueueLimit = 0;
+    });
+});
 
 var app = builder.Build();
 
@@ -115,6 +133,7 @@ app.UseStaticFiles(new StaticFileOptions
 });
 
 app.UseCors("AllowAll");
+app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -127,5 +146,19 @@ app.MapGet("/health/db", async (Fieldore.Infrastructure.Data.FieldoreDbContext d
         ? Results.Ok(new { status = "ok", database = "sqlserver" })
         : Results.Problem("Unable to connect to SQL Server.");
 });
+
+// Seed launch subscription plans if none exist (idempotent; no-op once plans are present).
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<Fieldore.Infrastructure.Data.FieldoreDbContext>();
+    try
+    {
+        await Fieldore.Infrastructure.Billing.BillingSeeder.SeedAsync(db);
+    }
+    catch (Exception ex)
+    {
+        app.Logger.LogWarning(ex, "Subscription plan seeding skipped (has the billing migration been applied?).");
+    }
+}
 
 app.Run();

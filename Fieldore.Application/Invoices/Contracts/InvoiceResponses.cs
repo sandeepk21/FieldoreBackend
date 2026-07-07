@@ -33,6 +33,8 @@ public sealed record PaymentRecordResponse(
     string? ReferenceNumber,
     string? Notes,
     bool IsStripePayment,
+    bool IsRefund,
+    Guid? RefundedPaymentId,
     DateTimeOffset CreatedAt);
 
 public sealed record InvoiceResponse(
@@ -57,9 +59,12 @@ public sealed record InvoiceResponse(
     string? CustomerEmailSnapshot,
     InvoiceAddressResponse? BillingAddress,
     InvoiceCustomerSummaryResponse? Customer,
+    Guid? PublicToken,
     List<InvoiceLineItemResponse> LineItems,
     List<PaymentRecordResponse> Payments,
     DateTimeOffset CreatedAt,
     DateTimeOffset UpdatedAt);
 
 public sealed record DeleteInvoiceResponse(Guid InvoiceId, string Message);
+
+public sealed record SendInvoiceResponse(Guid InvoiceId, string InvoiceNumber, Guid PublicToken, string PublicUrl);

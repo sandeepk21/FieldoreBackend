@@ -101,6 +101,12 @@ namespace Fieldore.Infrastructure.Migrations
                         .HasColumnType("bit")
                         .HasColumnName("is_active");
 
+                    b.Property<bool>("IsPlatformAdmin")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false)
+                        .HasColumnName("is_platform_admin");
+
                     b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)")
@@ -121,6 +127,60 @@ namespace Fieldore.Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("auth_users", (string)null);
+                });
+
+            modelBuilder.Entity("Fieldore.Domain.Entities.BillingEvent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("BusinessId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("business_id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Payload")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("payload");
+
+                    b.Property<DateTimeOffset?>("ProcessedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("processed_at");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasDefaultValue("received")
+                        .HasColumnName("status");
+
+                    b.Property<string>("StripeEventId")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)")
+                        .HasColumnName("stripe_event_id");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)")
+                        .HasColumnName("type");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StripeEventId")
+                        .IsUnique();
+
+                    b.ToTable("billing_events", (string)null);
                 });
 
             modelBuilder.Entity("Fieldore.Domain.Entities.Business", b =>
@@ -250,14 +310,44 @@ namespace Fieldore.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("business_id");
 
+                    b.Property<bool>("CancelAtPeriodEnd")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false)
+                        .HasColumnName("cancel_at_period_end");
+
+                    b.Property<DateTimeOffset?>("CancelledAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("cancelled_at");
+
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetimeoffset")
                         .HasColumnName("created_at");
+
+                    b.Property<DateTimeOffset?>("CurrentPeriodEnd")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("current_period_end");
+
+                    b.Property<DateTimeOffset?>("CurrentPeriodStart")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("current_period_start");
+
+                    b.Property<DateTimeOffset?>("EndedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("ended_at");
+
+                    b.Property<Guid?>("PlanId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("plan_id");
 
                     b.Property<string>("PlanName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("plan_name");
+
+                    b.Property<Guid?>("PlanPriceId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("plan_price_id");
 
                     b.Property<string>("Provider")
                         .IsRequired()
@@ -277,6 +367,14 @@ namespace Fieldore.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("status");
 
+                    b.Property<string>("StripeCustomerId")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("stripe_customer_id");
+
+                    b.Property<string>("StripeSubscriptionId")
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("stripe_subscription_id");
+
                     b.Property<DateOnly?>("TrialEndsOn")
                         .HasColumnType("date")
                         .HasColumnName("trial_ends_on");
@@ -289,6 +387,11 @@ namespace Fieldore.Infrastructure.Migrations
 
                     b.HasIndex("BusinessId")
                         .IsUnique();
+
+                    b.HasIndex("PlanId");
+
+                    b.HasIndex("StripeSubscriptionId")
+                        .HasFilter("[stripe_subscription_id] IS NOT NULL");
 
                     b.ToTable("business_subscriptions", (string)null);
                 });
@@ -384,6 +487,69 @@ namespace Fieldore.Infrastructure.Migrations
                             Name = "New Zealand",
                             UpdatedAt = new DateTimeOffset(new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
                         });
+                });
+
+            modelBuilder.Entity("Fieldore.Domain.Entities.Coupon", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal?>("AmountOff")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("amount_off");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("nvarchar(60)")
+                        .HasColumnName("code");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(8)
+                        .HasColumnType("nvarchar(8)")
+                        .HasDefaultValue("USD")
+                        .HasColumnName("currency");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true)
+                        .HasColumnName("is_active");
+
+                    b.Property<int?>("MaxRedemptions")
+                        .HasColumnType("int")
+                        .HasColumnName("max_redemptions");
+
+                    b.Property<decimal?>("PercentOff")
+                        .HasColumnType("decimal(5,2)")
+                        .HasColumnName("percent_off");
+
+                    b.Property<DateOnly?>("RedeemBy")
+                        .HasColumnType("date")
+                        .HasColumnName("redeem_by");
+
+                    b.Property<string>("StripeCouponId")
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)")
+                        .HasColumnName("stripe_coupon_id");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.ToTable("coupons", (string)null);
                 });
 
             modelBuilder.Entity("Fieldore.Domain.Entities.Customer", b =>
@@ -905,6 +1071,10 @@ namespace Fieldore.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("notes");
 
+                    b.Property<Guid?>("PublicToken")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("public_token");
+
                     b.Property<string>("PurchaseOrderNumber")
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("purchase_order_number");
@@ -935,6 +1105,10 @@ namespace Fieldore.Infrastructure.Migrations
                         .HasColumnName("updated_at");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("PublicToken")
+                        .IsUnique()
+                        .HasFilter("[public_token] IS NOT NULL");
 
                     b.HasIndex("BusinessId", "InvoiceNumber")
                         .IsUnique();
@@ -1378,6 +1552,12 @@ namespace Fieldore.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("invoice_id");
 
+                    b.Property<bool>("IsRefund")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false)
+                        .HasColumnName("is_refund");
+
                     b.Property<string>("Method")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)")
@@ -1399,6 +1579,10 @@ namespace Fieldore.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("reference_number");
 
+                    b.Property<Guid?>("RefundedPaymentId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("refunded_payment_id");
+
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("datetimeoffset")
                         .HasColumnName("updated_at");
@@ -1408,6 +1592,118 @@ namespace Fieldore.Infrastructure.Migrations
                     b.HasIndex("InvoiceId");
 
                     b.ToTable("payment_records", (string)null);
+                });
+
+            modelBuilder.Entity("Fieldore.Domain.Entities.PlanFeature", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("DisplayLabel")
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)")
+                        .HasColumnName("display_label");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("int")
+                        .HasColumnName("display_order");
+
+                    b.Property<string>("FeatureKey")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("nvarchar(60)")
+                        .HasColumnName("feature_key");
+
+                    b.Property<bool>("IsEnabled")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true)
+                        .HasColumnName("is_enabled");
+
+                    b.Property<int?>("LimitValue")
+                        .HasColumnType("int")
+                        .HasColumnName("limit_value");
+
+                    b.Property<Guid>("PlanId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("plan_id");
+
+                    b.Property<bool>("ShowOnPricing")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true)
+                        .HasColumnName("show_on_pricing");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PlanId", "FeatureKey")
+                        .IsUnique();
+
+                    b.ToTable("plan_features", (string)null);
+                });
+
+            modelBuilder.Entity("Fieldore.Domain.Entities.PlanPrice", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("amount");
+
+                    b.Property<string>("BillingCycle")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("billing_cycle");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(8)
+                        .HasColumnType("nvarchar(8)")
+                        .HasDefaultValue("USD")
+                        .HasColumnName("currency");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true)
+                        .HasColumnName("is_active");
+
+                    b.Property<Guid>("PlanId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("plan_id");
+
+                    b.Property<string>("StripePriceId")
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)")
+                        .HasColumnName("stripe_price_id");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PlanId", "BillingCycle")
+                        .IsUnique();
+
+                    b.ToTable("plan_prices", (string)null);
                 });
 
             modelBuilder.Entity("Fieldore.Domain.Entities.ServiceCatalogItem", b =>
@@ -2415,6 +2711,158 @@ namespace Fieldore.Infrastructure.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Fieldore.Domain.Entities.SubscriptionPlan", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Badge")
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)")
+                        .HasColumnName("badge");
+
+                    b.Property<string>("ButtonText")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(60)
+                        .HasColumnType("nvarchar(60)")
+                        .HasDefaultValue("Get Started")
+                        .HasColumnName("button_text");
+
+                    b.Property<string>("Color")
+                        .HasMaxLength(16)
+                        .HasColumnType("nvarchar(16)")
+                        .HasColumnName("color");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(8)
+                        .HasColumnType("nvarchar(8)")
+                        .HasDefaultValue("USD")
+                        .HasColumnName("currency");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("description");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("int")
+                        .HasColumnName("display_order");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true)
+                        .HasColumnName("is_active");
+
+                    b.Property<bool>("IsArchived")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false)
+                        .HasColumnName("is_archived");
+
+                    b.Property<bool>("IsRecommended")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false)
+                        .HasColumnName("is_recommended");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("name");
+
+                    b.Property<string>("Slug")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("slug");
+
+                    b.Property<int>("TrialDays")
+                        .HasColumnType("int")
+                        .HasColumnName("trial_days");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("Visibility")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(16)
+                        .HasColumnType("nvarchar(16)")
+                        .HasDefaultValue("public")
+                        .HasColumnName("visibility");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Slug")
+                        .IsUnique();
+
+                    b.ToTable("subscription_plans", (string)null);
+                });
+
+            modelBuilder.Entity("Fieldore.Domain.Entities.SubscriptionUsage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("BusinessId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("business_id");
+
+                    b.Property<int>("CompletedJobsCount")
+                        .HasColumnType("int")
+                        .HasColumnName("completed_jobs_count");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("created_at");
+
+                    b.Property<int>("CustomersAddedCount")
+                        .HasColumnType("int")
+                        .HasColumnName("customers_added_count");
+
+                    b.Property<int>("EmployeesCount")
+                        .HasColumnType("int")
+                        .HasColumnName("employees_count");
+
+                    b.Property<int>("InvoicesCreatedCount")
+                        .HasColumnType("int")
+                        .HasColumnName("invoices_created_count");
+
+                    b.Property<DateOnly>("PeriodEnd")
+                        .HasColumnType("date")
+                        .HasColumnName("period_end");
+
+                    b.Property<DateOnly>("PeriodStart")
+                        .HasColumnType("date")
+                        .HasColumnName("period_start");
+
+                    b.Property<long>("StorageUsedBytes")
+                        .HasColumnType("bigint")
+                        .HasColumnName("storage_used_bytes");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BusinessId", "PeriodStart")
+                        .IsUnique();
+
+                    b.ToTable("subscription_usages", (string)null);
+                });
+
             modelBuilder.Entity("Fieldore.Domain.Entities.UserNotificationPreference", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2514,6 +2962,16 @@ namespace Fieldore.Infrastructure.Migrations
                         .HasForeignKey("BusinessId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Fieldore.Domain.Entities.BusinessSubscription", b =>
+                {
+                    b.HasOne("Fieldore.Domain.Entities.SubscriptionPlan", "Plan")
+                        .WithMany()
+                        .HasForeignKey("PlanId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Plan");
                 });
 
             modelBuilder.Entity("Fieldore.Domain.Entities.CustomerAddress", b =>
@@ -2804,6 +3262,28 @@ namespace Fieldore.Infrastructure.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Fieldore.Domain.Entities.PlanFeature", b =>
+                {
+                    b.HasOne("Fieldore.Domain.Entities.SubscriptionPlan", "Plan")
+                        .WithMany("Features")
+                        .HasForeignKey("PlanId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Plan");
+                });
+
+            modelBuilder.Entity("Fieldore.Domain.Entities.PlanPrice", b =>
+                {
+                    b.HasOne("Fieldore.Domain.Entities.SubscriptionPlan", "Plan")
+                        .WithMany("Prices")
+                        .HasForeignKey("PlanId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Plan");
+                });
+
             modelBuilder.Entity("Fieldore.Domain.Entities.ServiceCatalogItem", b =>
                 {
                     b.HasOne("Fieldore.Domain.Entities.Business", null)
@@ -2866,6 +3346,13 @@ namespace Fieldore.Infrastructure.Migrations
                     b.Navigation("Notes");
 
                     b.Navigation("Photos");
+                });
+
+            modelBuilder.Entity("Fieldore.Domain.Entities.SubscriptionPlan", b =>
+                {
+                    b.Navigation("Features");
+
+                    b.Navigation("Prices");
                 });
 #pragma warning restore 612, 618
         }

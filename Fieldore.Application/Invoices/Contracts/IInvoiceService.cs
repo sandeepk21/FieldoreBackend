@@ -31,7 +31,17 @@ public interface IInvoiceService
         UpdateInvoiceStatusRequest request,
         CancellationToken cancellationToken = default);
 
+    Task<ApiResponse<InvoiceResponse?>> GetByJobIdAsync(
+        Guid userId,
+        Guid jobId,
+        CancellationToken cancellationToken = default);
+
     Task<ApiResponse<DeleteInvoiceResponse>> DeleteAsync(
+        Guid userId,
+        Guid invoiceId,
+        CancellationToken cancellationToken = default);
+
+    Task<ApiResponse<SendInvoiceResponse>> SendInvoiceAsync(
         Guid userId,
         Guid invoiceId,
         CancellationToken cancellationToken = default);

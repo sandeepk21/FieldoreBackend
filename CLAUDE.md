@@ -33,5 +33,8 @@ API for the Fieldore field-service app. The mobile frontend is a separate Expo r
 - `TokenService` sets JWT `expires: DateTime.MaxValue` and `JwtSettings.SecretKey` is a hardcoded default — add real expiry/refresh and move secret to secrets/env.
 - Stripe keys (to be added) must live in user-secrets/env, and the webhook must verify signatures.
 
+## Subscription & billing (added 2026-07)
+Admin-configurable SaaS subscriptions. Verticals: `Fieldore.*/Billing` (entitlements, usage, `StripeBillingService`), `.../Subscriptions`, `.../Admin`, `.../Notifications`. Endpoints: public `GET /api/plans`, `GET /api/subscription/me`, `POST /api/billing/{checkout-session,portal-session,webhook}`, `/api/admin/{plans,subscriptions,analytics}` (gated by `PlatformAdmin` policy). **Two separate Stripe integrations** — Connect (`StripeService`, provider→customer invoices) vs **Billing** (`StripeBillingService`, provider→Fieldore subscriptions); Billing reuses `Stripe:SecretKey` but needs its own `Stripe:BillingWebhookSecret`. Stripe.net 52: subscription period is on `SubscriptionItem`. Job completion enforces `job_limit` via `IEntitlementService`. Plans seeded by `BillingSeeder`. Platform admin = `AuthUser.IsPlatformAdmin`. Full spec: `Fieldore/docs/subscription/PLAN.md`. Web app: `d:\Developer\web` (Next.js).
+
 ## Roadmap & memory
 Active roadmap: `C:\Users\sande\.claude\plans\please-scan-my-app-abundant-elephant.md`. Project facts/decisions in Claude memory (`MEMORY.md` index).

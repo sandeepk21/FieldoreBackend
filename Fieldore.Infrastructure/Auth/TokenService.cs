@@ -2,6 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Fieldore.Application.Auth.Contracts;
+using Fieldore.Domain.Constants;
 using Fieldore.Domain.Entities;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -26,6 +27,11 @@ public sealed class TokenService(IOptions<JwtSettings> jwtOptions) : ITokenServi
         if (businessId.HasValue)
         {
             claims.Add(new Claim("business_id", businessId.Value.ToString()));
+        }
+
+        if (authUser.IsPlatformAdmin)
+        {
+            claims.Add(new Claim(PlatformRoles.IsPlatformAdminClaim, "true"));
         }
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(settings.SecretKey));

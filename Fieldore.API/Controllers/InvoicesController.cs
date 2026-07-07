@@ -37,6 +37,13 @@ public sealed class InvoicesController(IInvoiceService invoiceService) : Control
         return await invoiceService.GetAllAsync(userId, request, cancellationToken);
     }
 
+    [HttpGet("byJob/{jobId:guid}")]
+    public async Task<IActionResult> GetByJob(Guid jobId, CancellationToken cancellationToken)
+    {
+        if (!TryGetUserId(out var userId)) return Unauthorized();
+        return Ok(await invoiceService.GetByJobIdAsync(userId, jobId, cancellationToken));
+    }
+
     [HttpGet("getById/{invoiceId:guid}")]
     public async Task<ActionResult<ApiResponse<InvoiceResponse>>> GetById(
         Guid invoiceId,
@@ -89,6 +96,15 @@ public sealed class InvoicesController(IInvoiceService invoiceService) : Control
         }
 
         return await invoiceService.DeleteAsync(userId, invoiceId, cancellationToken);
+    }
+
+    [HttpPost("send/{invoiceId:guid}")]
+    public async Task<ActionResult<ApiResponse<SendInvoiceResponse>>> Send(
+        Guid invoiceId, CancellationToken cancellationToken)
+    {
+        if (!TryGetUserId(out var userId))
+            return Unauthorized(ApiResponse<SendInvoiceResponse>.Create(null, false, "Invalid token", 401));
+        return await invoiceService.SendInvoiceAsync(userId, invoiceId, cancellationToken);
     }
 
     private bool TryGetUserId(out Guid userId)

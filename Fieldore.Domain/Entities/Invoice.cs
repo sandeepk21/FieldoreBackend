@@ -24,6 +24,7 @@ public sealed class Invoice : AuditableEntity
     public string CustomerNameSnapshot { get; set; } = string.Empty;
     public string? CustomerEmailSnapshot { get; set; }
     public Address? BillingAddressSnapshot { get; set; }
+    public Guid? PublicToken { get; set; }
     public List<InvoiceLineItem> LineItems { get; set; } = [];
     public List<PaymentRecord> Payments { get; set; } = [];
 }

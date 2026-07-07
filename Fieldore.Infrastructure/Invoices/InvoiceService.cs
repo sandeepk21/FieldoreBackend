@@ -5,10 +5,11 @@ using Fieldore.Domain.Entities;
 using Fieldore.Domain.ValueObjects;
 using Fieldore.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 namespace Fieldore.Infrastructure.Invoices;
 
-public sealed class InvoiceService(FieldoreDbContext dbContext) : IInvoiceService
+public sealed class InvoiceService(FieldoreDbContext dbContext, IConfiguration configuration) : IInvoiceService
 {
     public async Task<ApiResponse<InvoiceResponse>> CreateAsync(
         Guid userId,
@@ -199,6 +200,26 @@ public sealed class InvoiceService(FieldoreDbContext dbContext) : IInvoiceServic
 
         var response = (await BuildInvoiceResponsesAsync([invoice], cancellationToken)).Single();
         return ApiResponse<InvoiceResponse>.Create(response, true, "Invoice fetched successfully", 200);
+    }
+
+    public async Task<ApiResponse<InvoiceResponse?>> GetByJobIdAsync(
+        Guid userId,
+        Guid jobId,
+        CancellationToken cancellationToken = default)
+    {
+        var businessId = await GetBusinessIdAsync(userId, cancellationToken);
+        if (businessId is null)
+            return ApiResponse<InvoiceResponse?>.Create(null, false, "Business not found for user", 404);
+
+        var invoice = await dbContext.Invoices
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.JobId == jobId && x.BusinessId == businessId.Value, cancellationToken);
+
+        if (invoice is null)
+            return ApiResponse<InvoiceResponse?>.Create(null, true, "No invoice for this job", 200);
+
+        var response = (await BuildInvoiceResponsesAsync([invoice], cancellationToken)).Single();
+        return ApiResponse<InvoiceResponse?>.Create(response, true, "Invoice fetched", 200);
     }
 
     public async Task<ApiResponse<InvoiceResponse>> UpdateAsync(
@@ -418,6 +439,7 @@ public sealed class InvoiceService(FieldoreDbContext dbContext) : IInvoiceServic
                         x.Id, x.Amount, x.Method, x.PaidAt,
                         x.ReferenceNumber, x.Notes,
                         x.Method == "stripe",
+                        x.IsRefund, x.RefundedPaymentId,
                         x.CreatedAt))
                     .ToList();
 
@@ -449,6 +471,7 @@ public sealed class InvoiceService(FieldoreDbContext dbContext) : IInvoiceServic
                             BuildCustomerDisplayName(customer),
                             customer.Email,
                             customer.MobilePhone),
+                    invoice.PublicToken,
                     responseLineItems,
                     responsePayments,
                     invoice.CreatedAt,
@@ -745,6 +768,37 @@ public sealed class InvoiceService(FieldoreDbContext dbContext) : IInvoiceServic
         var parts = invoiceNumber.Split('-', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
         var lastPart = parts.LastOrDefault();
         return int.TryParse(lastPart, out var sequence) ? sequence : 0;
+    }
+
+    public async Task<ApiResponse<SendInvoiceResponse>> SendInvoiceAsync(
+        Guid userId, Guid invoiceId, CancellationToken cancellationToken = default)
+    {
+        var businessId = await GetBusinessIdAsync(userId, cancellationToken);
+        if (businessId is null)
+            return ApiResponse<SendInvoiceResponse>.Create(null, false, "Business not found for user", 404);
+
+        var invoice = await dbContext.Invoices
+            .FirstOrDefaultAsync(x => x.Id == invoiceId && x.BusinessId == businessId.Value, cancellationToken);
+        if (invoice is null)
+            return ApiResponse<SendInvoiceResponse>.Create(null, false, "Invoice not found", 404);
+
+        if (invoice.Status is InvoiceStatuses.Void)
+            return ApiResponse<SendInvoiceResponse>.Create(null, false, "Cannot send a voided invoice", 400);
+
+        if (invoice.PublicToken is null)
+            invoice.PublicToken = Guid.NewGuid();
+
+        if (invoice.Status is InvoiceStatuses.Draft)
+            invoice.Status = InvoiceStatuses.Sent;
+
+        await dbContext.SaveChangesAsync(cancellationToken);
+
+        var baseUrl = configuration["App:BaseUrl"] ?? "http://localhost:5166";
+        var publicUrl = $"{baseUrl}/invoice/{invoice.PublicToken}";
+
+        return ApiResponse<SendInvoiceResponse>.Create(
+            new SendInvoiceResponse(invoice.Id, invoice.InvoiceNumber, invoice.PublicToken.Value, publicUrl),
+            true, "Invoice sent", 200);
     }
 
     private static string FormatInvoiceNumber(int sequence) => $"INV-{sequence:D6}";

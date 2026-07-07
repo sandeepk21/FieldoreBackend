@@ -9,4 +9,6 @@ public sealed record PaymentResponse(
     string? ReferenceNumber,
     string? Notes,
     bool IsStripePayment,
+    bool IsRefund,
+    Guid? RefundedPaymentId,
     DateTimeOffset CreatedAt);

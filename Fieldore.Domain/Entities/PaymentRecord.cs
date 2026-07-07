@@ -11,4 +11,6 @@ public sealed class PaymentRecord : AuditableEntity
     public string? ReferenceNumber { get; set; }
     public string? Notes { get; set; }
     public Guid? RecordedByUserId { get; set; }
+    public bool IsRefund { get; set; } = false;
+    public Guid? RefundedPaymentId { get; set; }
 }

@@ -38,6 +38,15 @@ public sealed class PaymentsController(IPaymentService paymentService) : Control
         return await paymentService.DeleteAsync(userId, invoiceId, paymentId, cancellationToken);
     }
 
+    [HttpPost("refund/{invoiceId:guid}")]
+    public async Task<ActionResult<ApiResponse<PaymentResponse>>> Refund(
+        Guid invoiceId, [FromBody] RecordRefundRequest request, CancellationToken cancellationToken)
+    {
+        if (!TryGetUserId(out var userId))
+            return Unauthorized(ApiResponse<PaymentResponse>.Create(null, false, "Invalid token", 401));
+        return await paymentService.RefundAsync(userId, invoiceId, request, cancellationToken);
+    }
+
     private bool TryGetUserId(out Guid userId)
     {
         var claim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;

@@ -6,3 +6,8 @@ public sealed record RecordPaymentRequest(
     DateTimeOffset PaidAt,
     string? ReferenceNumber,
     string? Notes);
+
+public sealed record RecordRefundRequest(
+    Guid PaymentId,
+    decimal Amount,
+    string? Notes);

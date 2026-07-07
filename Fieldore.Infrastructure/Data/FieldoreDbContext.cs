@@ -19,6 +19,12 @@ public sealed class FieldoreDbContext : DbContext
     public DbSet<Business> Businesses => Set<Business>();
     public DbSet<BusinessMembership> BusinessMemberships => Set<BusinessMembership>();
     public DbSet<BusinessSubscription> BusinessSubscriptions => Set<BusinessSubscription>();
+    public DbSet<SubscriptionPlan> SubscriptionPlans => Set<SubscriptionPlan>();
+    public DbSet<PlanPrice> PlanPrices => Set<PlanPrice>();
+    public DbSet<PlanFeature> PlanFeatures => Set<PlanFeature>();
+    public DbSet<SubscriptionUsage> SubscriptionUsages => Set<SubscriptionUsage>();
+    public DbSet<BillingEvent> BillingEvents => Set<BillingEvent>();
+    public DbSet<Coupon> Coupons => Set<Coupon>();
     public DbSet<ServiceCatalogItem> ServiceCatalogItems => Set<ServiceCatalogItem>();
     public DbSet<Customer> Customers => Set<Customer>();
     public DbSet<CustomerAddress> CustomerAddresses => Set<CustomerAddress>();
@@ -65,6 +71,7 @@ public sealed class FieldoreDbContext : DbContext
         ConfigurePayments(modelBuilder);
         ConfigureExpenses(modelBuilder);
         ConfigureNotificationPreferences(modelBuilder);
+        ConfigureBilling(modelBuilder);
     }
 
     public override int SaveChanges()
@@ -121,6 +128,7 @@ public sealed class FieldoreDbContext : DbContext
         authUsers.Property(x => x.PasswordHash).HasColumnName("password_hash");
         authUsers.Property(x => x.PasswordSalt).HasColumnName("password_salt");
         authUsers.Property(x => x.IsActive).HasColumnName("is_active");
+        authUsers.Property(x => x.IsPlatformAdmin).HasColumnName("is_platform_admin").HasDefaultValue(false);
         authUsers.HasIndex(x => x.Email).IsUnique();
         ConfigureAuditColumns(authUsers);
     }
@@ -185,7 +193,18 @@ public sealed class FieldoreDbContext : DbContext
         subscriptions.Property(x => x.RenewsOn).HasColumnName("renews_on");
         subscriptions.Property(x => x.TrialEndsOn).HasColumnName("trial_ends_on");
         subscriptions.Property(x => x.Status).HasColumnName("status");
+        subscriptions.Property(x => x.PlanId).HasColumnName("plan_id");
+        subscriptions.Property(x => x.PlanPriceId).HasColumnName("plan_price_id");
+        subscriptions.Property(x => x.StripeCustomerId).HasColumnName("stripe_customer_id");
+        subscriptions.Property(x => x.StripeSubscriptionId).HasColumnName("stripe_subscription_id");
+        subscriptions.Property(x => x.CurrentPeriodStart).HasColumnName("current_period_start");
+        subscriptions.Property(x => x.CurrentPeriodEnd).HasColumnName("current_period_end");
+        subscriptions.Property(x => x.CancelAtPeriodEnd).HasColumnName("cancel_at_period_end").HasDefaultValue(false);
+        subscriptions.Property(x => x.CancelledAt).HasColumnName("cancelled_at");
+        subscriptions.Property(x => x.EndedAt).HasColumnName("ended_at");
         subscriptions.HasIndex(x => x.BusinessId).IsUnique();
+        subscriptions.HasIndex(x => x.StripeSubscriptionId).HasFilter("[stripe_subscription_id] IS NOT NULL");
+        subscriptions.HasOne(x => x.Plan).WithMany().HasForeignKey(x => x.PlanId).OnDelete(DeleteBehavior.SetNull);
         ConfigureAuditColumns(subscriptions);
 
         var services = modelBuilder.Entity<ServiceCatalogItem>();
@@ -463,6 +482,8 @@ public sealed class FieldoreDbContext : DbContext
         invoices.Property(x => x.Notes).HasColumnName("notes");
         invoices.Property(x => x.CustomerNameSnapshot).HasColumnName("customer_name_snapshot");
         invoices.Property(x => x.CustomerEmailSnapshot).HasColumnName("customer_email_snapshot");
+        invoices.Property(x => x.PublicToken).HasColumnName("public_token");
+        invoices.HasIndex(x => x.PublicToken).IsUnique().HasFilter("[public_token] IS NOT NULL");
         invoices.HasIndex(x => new { x.BusinessId, x.InvoiceNumber }).IsUnique();
         ConfigureAddress(invoices, x => x.BillingAddressSnapshot, "billing_");
         ConfigureAuditColumns(invoices);
@@ -493,6 +514,8 @@ public sealed class FieldoreDbContext : DbContext
         entity.Property(x => x.ReferenceNumber).HasColumnName("reference_number");
         entity.Property(x => x.Notes).HasColumnName("notes");
         entity.Property(x => x.RecordedByUserId).HasColumnName("recorded_by_user_id");
+        entity.Property(x => x.IsRefund).HasColumnName("is_refund").HasDefaultValue(false);
+        entity.Property(x => x.RefundedPaymentId).HasColumnName("refunded_payment_id");
         ConfigureAuditColumns(entity);
     }
 
@@ -527,6 +550,95 @@ public sealed class FieldoreDbContext : DbContext
         entity.Property(x => x.MarketingEnabled).HasColumnName("marketing_enabled");
         entity.HasIndex(x => x.UserProfileId).IsUnique();
         ConfigureAuditColumns(entity);
+    }
+
+    private static void ConfigureBilling(ModelBuilder modelBuilder)
+    {
+        var plans = modelBuilder.Entity<SubscriptionPlan>();
+        plans.ToTable("subscription_plans");
+        plans.HasKey(x => x.Id);
+        plans.Property(x => x.Name).HasColumnName("name").HasMaxLength(100);
+        plans.Property(x => x.Slug).HasColumnName("slug").HasMaxLength(100);
+        plans.Property(x => x.Description).HasColumnName("description");
+        plans.Property(x => x.Currency).HasColumnName("currency").HasMaxLength(8).HasDefaultValue("USD");
+        plans.Property(x => x.IsActive).HasColumnName("is_active").HasDefaultValue(true);
+        plans.Property(x => x.IsArchived).HasColumnName("is_archived").HasDefaultValue(false);
+        plans.Property(x => x.IsRecommended).HasColumnName("is_recommended").HasDefaultValue(false);
+        plans.Property(x => x.Visibility).HasColumnName("visibility").HasMaxLength(16).HasDefaultValue("public");
+        plans.Property(x => x.DisplayOrder).HasColumnName("display_order");
+        plans.Property(x => x.Badge).HasColumnName("badge").HasMaxLength(40);
+        plans.Property(x => x.ButtonText).HasColumnName("button_text").HasMaxLength(60).HasDefaultValue("Get Started");
+        plans.Property(x => x.Color).HasColumnName("color").HasMaxLength(16);
+        plans.Property(x => x.TrialDays).HasColumnName("trial_days");
+        plans.HasIndex(x => x.Slug).IsUnique();
+        ConfigureAuditColumns(plans);
+
+        var prices = modelBuilder.Entity<PlanPrice>();
+        prices.ToTable("plan_prices");
+        prices.HasKey(x => x.Id);
+        prices.Property(x => x.PlanId).HasColumnName("plan_id");
+        prices.Property(x => x.BillingCycle).HasColumnName("billing_cycle").HasMaxLength(20);
+        prices.Property(x => x.Amount).HasColumnName("amount").HasColumnType("decimal(18,2)");
+        prices.Property(x => x.Currency).HasColumnName("currency").HasMaxLength(8).HasDefaultValue("USD");
+        prices.Property(x => x.StripePriceId).HasColumnName("stripe_price_id").HasMaxLength(80);
+        prices.Property(x => x.IsActive).HasColumnName("is_active").HasDefaultValue(true);
+        prices.HasIndex(x => new { x.PlanId, x.BillingCycle }).IsUnique();
+        prices.HasOne(x => x.Plan).WithMany(x => x.Prices).HasForeignKey(x => x.PlanId).OnDelete(DeleteBehavior.Cascade);
+        ConfigureAuditColumns(prices);
+
+        var features = modelBuilder.Entity<PlanFeature>();
+        features.ToTable("plan_features");
+        features.HasKey(x => x.Id);
+        features.Property(x => x.PlanId).HasColumnName("plan_id");
+        features.Property(x => x.FeatureKey).HasColumnName("feature_key").HasMaxLength(60);
+        features.Property(x => x.IsEnabled).HasColumnName("is_enabled").HasDefaultValue(true);
+        features.Property(x => x.LimitValue).HasColumnName("limit_value");
+        features.Property(x => x.DisplayLabel).HasColumnName("display_label").HasMaxLength(120);
+        features.Property(x => x.DisplayOrder).HasColumnName("display_order");
+        features.Property(x => x.ShowOnPricing).HasColumnName("show_on_pricing").HasDefaultValue(true);
+        features.HasIndex(x => new { x.PlanId, x.FeatureKey }).IsUnique();
+        features.HasOne(x => x.Plan).WithMany(x => x.Features).HasForeignKey(x => x.PlanId).OnDelete(DeleteBehavior.Cascade);
+        ConfigureAuditColumns(features);
+
+        var usage = modelBuilder.Entity<SubscriptionUsage>();
+        usage.ToTable("subscription_usages");
+        usage.HasKey(x => x.Id);
+        usage.Property(x => x.BusinessId).HasColumnName("business_id");
+        usage.Property(x => x.PeriodStart).HasColumnName("period_start");
+        usage.Property(x => x.PeriodEnd).HasColumnName("period_end");
+        usage.Property(x => x.CompletedJobsCount).HasColumnName("completed_jobs_count");
+        usage.Property(x => x.InvoicesCreatedCount).HasColumnName("invoices_created_count");
+        usage.Property(x => x.CustomersAddedCount).HasColumnName("customers_added_count");
+        usage.Property(x => x.EmployeesCount).HasColumnName("employees_count");
+        usage.Property(x => x.StorageUsedBytes).HasColumnName("storage_used_bytes");
+        usage.HasIndex(x => new { x.BusinessId, x.PeriodStart }).IsUnique();
+        ConfigureAuditColumns(usage);
+
+        var events = modelBuilder.Entity<BillingEvent>();
+        events.ToTable("billing_events");
+        events.HasKey(x => x.Id);
+        events.Property(x => x.BusinessId).HasColumnName("business_id");
+        events.Property(x => x.StripeEventId).HasColumnName("stripe_event_id").HasMaxLength(80);
+        events.Property(x => x.Type).HasColumnName("type").HasMaxLength(80);
+        events.Property(x => x.Payload).HasColumnName("payload");
+        events.Property(x => x.ProcessedAt).HasColumnName("processed_at");
+        events.Property(x => x.Status).HasColumnName("status").HasMaxLength(20).HasDefaultValue("received");
+        events.HasIndex(x => x.StripeEventId).IsUnique();
+        ConfigureAuditColumns(events);
+
+        var coupons = modelBuilder.Entity<Coupon>();
+        coupons.ToTable("coupons");
+        coupons.HasKey(x => x.Id);
+        coupons.Property(x => x.Code).HasColumnName("code").HasMaxLength(60);
+        coupons.Property(x => x.PercentOff).HasColumnName("percent_off").HasColumnType("decimal(5,2)");
+        coupons.Property(x => x.AmountOff).HasColumnName("amount_off").HasColumnType("decimal(18,2)");
+        coupons.Property(x => x.Currency).HasColumnName("currency").HasMaxLength(8).HasDefaultValue("USD");
+        coupons.Property(x => x.MaxRedemptions).HasColumnName("max_redemptions");
+        coupons.Property(x => x.RedeemBy).HasColumnName("redeem_by");
+        coupons.Property(x => x.StripeCouponId).HasColumnName("stripe_coupon_id").HasMaxLength(80);
+        coupons.Property(x => x.IsActive).HasColumnName("is_active").HasDefaultValue(true);
+        coupons.HasIndex(x => x.Code).IsUnique();
+        ConfigureAuditColumns(coupons);
     }
 
     private static void ConfigureAddress<TEntity>(

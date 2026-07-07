@@ -1,4 +1,6 @@
 using Fieldore.Application.Auth.Contracts;
+using Fieldore.Application.Billing.Entitlements;
+using Fieldore.Application.Billing.Usage;
 using Fieldore.Application.Jobs.Contracts;
 using Fieldore.Domain.Constants;
 using Fieldore.Domain.Entities;
@@ -8,7 +10,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Fieldore.Infrastructure.Jobs;
 
-public sealed class JobService(FieldoreDbContext dbContext) : IJobService
+public sealed class JobService(
+    FieldoreDbContext dbContext,
+    IEntitlementService entitlements,
+    IUsageService usage) : IJobService
 {
     public async Task<ApiResponse<JobResponse>> CreateAsync(
         Guid userId,
@@ -340,11 +345,41 @@ public sealed class JobService(FieldoreDbContext dbContext) : IJobService
             return ApiResponse<JobResponse>.Create(null, false, validationMessage, 400);
         }
 
-        job.Status = NormalizeStatus(request.Status);
+        var normalizedStatus = NormalizeStatus(request.Status);
+        var wasCompleted = job.Status == JobStatuses.Completed;
+        var willComplete = normalizedStatus == JobStatuses.Completed && !wasCompleted;
+
+        // Subscription gate: completing a job consumes the plan's job allowance.
+        if (willComplete)
+        {
+            var entitlement = await entitlements.GetForBusinessAsync(businessId.Value, cancellationToken);
+
+            if (!entitlement.IsActive)
+            {
+                return ApiResponse<JobResponse>.Create(null, false,
+                    BillingErrorCodes.Message(BillingErrorCodes.SubscriptionInactive,
+                        "Your subscription is inactive. Please subscribe to complete jobs."), 403);
+            }
+
+            if (entitlement.RemainingCompletedJobs() <= 0)
+            {
+                var limit = entitlement.LimitFor(FeatureKeys.JobLimit);
+                return ApiResponse<JobResponse>.Create(null, false,
+                    BillingErrorCodes.Message(BillingErrorCodes.SubscriptionLimitReached,
+                        $"You've reached your plan's limit of {limit} completed jobs. Upgrade to complete more."), 403);
+            }
+        }
+
+        job.Status = normalizedStatus;
         job.ActualStartAt = request.ActualStartAt;
         job.ActualEndAt = request.ActualEndAt;
 
         await dbContext.SaveChangesAsync(cancellationToken);
+
+        if (willComplete)
+        {
+            await usage.IncrementCompletedJobsAsync(businessId.Value, cancellationToken);
+        }
 
         return await GetByIdAsync(userId, jobId, cancellationToken);
     }
